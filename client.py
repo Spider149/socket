@@ -31,20 +31,19 @@ def submitIP():
     host = entryIP.get()
     port = 65432
     server_address = (host, port)
-    print("Client connect to server with port: " + str(port))
     global client
-    client.connect(server_address)
-    client.sendall(bytes("-hello-", "utf8"))
-    data = client.recv(1024).decode("utf8")
     try:
+        client.connect(server_address)
+        client.sendall(bytes("-hello-", "utf8"))
+        data = client.recv(1024).decode("utf8")
         if data == "-connected-":
             print("connected")
             tkmes.showinfo(title="Success",
                            message="Kết nối thành công")
             global connected
             connected = True
-    except:
-        tkmes.showerror(tittle="Error", message="Kết nối thất bại")
+    except socket.error:
+        tkmes.showerror(title="Error", message="Kết nối thất bại")
 
 
 def takeScreen():
@@ -58,16 +57,15 @@ def takeScreen():
 
 
 def saveImg():
-    filename = tkdilg.asksaveasfilename()
-    #sm.move("snapshot.png", filename)
-    print(filename)
-    sm.move("snapshot.png", filename)
+    filename = tkdilg.asksaveasfilename(defaultextension=".png", filetypes=(
+        ("PNG file", "*.png"), ("All Files", "*.*")))
+    if filename != "":
+        sm.move("snapshot.png", filename)
 
 
 def takeScreenshotRequest():
     global connected
     if connected:
-        print("take screen")
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "Screenshot")
         snapBtn = tk.Button(newWindow, text="Chụp",
