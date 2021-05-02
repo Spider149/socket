@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.messagebox as tkmes
 import tkinter.filedialog as tkdilg
+from PIL import ImageTk, Image
 import socket
 import base64
 import os
@@ -46,24 +47,37 @@ def submitIP():
         tkmes.showerror(title="Error", message="Kết nối thất bại")
 
 
-def takeScreen():
-    global client
-    client.sendall(bytes("*snap*", "utf8"))
-    data = client.recv(1024*1024)
-    image = base64.b64decode(data)
-    f = open('snapshot.png', 'wb')
-    f.write(image)
-    f.close()
-
-
-def saveImg():
-    filename = tkdilg.asksaveasfilename(defaultextension=".png", filetypes=(
-        ("PNG file", "*.png"), ("All Files", "*.*")))
-    if filename != "":
-        sm.move("snapshot.png", filename)
-
-
 def takeScreenshotRequest():
+    def takeScreenFirst():  # lúc mở lên là chụp luôn, không cần update
+        global client
+        client.sendall(bytes("*snap*", "utf8"))
+        data = client.recv(1024*1024)
+        image = base64.b64decode(data)
+        f = open('snapshot.png', 'wb')
+        f.write(image)
+        f.close()
+
+    def takeScreen():  # các lần chụp sau, chụp xong update vô GUI
+        takeScreenFirst()
+        resizedImg = resizeImg()
+        lb.configure(image=resizedImg)
+        lb.image = resizedImg
+
+    def saveImg():  # lưu hình, nếu không lưu thì tí nữa sẽ bị xóa khi đóng app
+        filename = tkdilg.asksaveasfilename(defaultextension=".png", filetypes=(
+            ("PNG file", "*.png"), ("All Files", "*.*")))
+        if filename != "":
+            sm.move("snapshot.png", filename)
+
+    def resizeImg():  # scale hình cho vừa khung
+        img = Image.open('snapshot.png')
+        newWidth = 360
+        ratioScale = img.width/newWidth
+        newHeight = int(img.height/ratioScale)
+        resized = img.resize((newWidth, newHeight), Image.ANTIALIAS)
+        newImg = ImageTk.PhotoImage(resized)
+        return newImg
+
     global connected
     if connected:
         newWindow = tk.Toplevel(root)
@@ -71,11 +85,17 @@ def takeScreenshotRequest():
         snapBtn = tk.Button(newWindow, text="Chụp",
                             command=takeScreen)
         snapBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
-                     tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+                     tk.S+tk.E, pady=20, padx=20)
         saveImgBtn = tk.Button(newWindow, text="Lưu",
                                command=saveImg)
         saveImgBtn.grid(row=0, column=1, sticky=tk.W+tk.N +
-                        tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+                        tk.S+tk.E, pady=20, padx=(0, 20))
+        takeScreenFirst()
+        resizedImg = resizeImg()
+        lb = tk.Label(newWindow, image=resizedImg)
+        lb.grid(row=1, column=0, columnspan=2, sticky=tk.W+tk.N +
+                tk.S+tk.E, pady=(20, 20), padx=(20, 20))
+        newWindow.mainloop()
     else:
         showConnectionError()
 
@@ -140,6 +160,8 @@ def exitRequest():
         global client
         client.sendall(bytes("-exit-", "utf8"))
         client.close()
+        if os.path.exists("snapshot.png"):
+            os.remove("snapshot.png")
     root.destroy()
 
 
@@ -150,6 +172,8 @@ labelIP.grid(row=0, column=0, pady=20, sticky=tk.W +
 entryIP = tk.Entry(root)
 entryIP.grid(row=0, column=1, pady=20, sticky=tk.W +
              tk.S+tk.N+tk.E, padx=(0, 10))
+
+entryIP.insert(tk.END, '127.0.0.1')
 
 ipBtn = tk.Button(root, text="Nhập", command=submitIP)
 ipBtn.grid(row=0, column=2, sticky=tk.W+tk.S +
