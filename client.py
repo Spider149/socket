@@ -145,13 +145,13 @@ def keystrokeRequest():
 
 
 def registryRequest():
-    global connected
-    if connected:
-        print("registry")
-        newWindow = tk.Toplevel(root)
-        createNewWindow(newWindow, "Registry")
-    else:
-        showConnectionError()
+    # global connected
+    # if connected:
+    print("registry")
+    newWindow = tk.Toplevel(root)
+    createNewWindow(newWindow, "Registry")
+    # else:
+    #     showConnectionError()
 
 
 def exitRequest():
