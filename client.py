@@ -1,6 +1,8 @@
 import tkinter as tk
 import tkinter.messagebox as tkmes
 import tkinter.filedialog as tkdilg
+import tkinter.ttk as ttk
+import tkinter.font as font
 from PIL import ImageTk, Image
 import socket
 import base64
@@ -12,6 +14,7 @@ root.title("Client")
 
 root.minsize(340, 250)
 connected = False
+myFont = font.Font(family="VnArial", size=9)
 
 
 def createNewWindow(newWindow, name):
@@ -145,11 +148,69 @@ def keystrokeRequest():
 
 
 def registryRequest():
+    def submitAddress():
+        print("Submit address")
     # global connected
     # if connected:
     print("registry")
     newWindow = tk.Toplevel(root)
     createNewWindow(newWindow, "Registry")
+    address = tk.Entry(newWindow)
+
+    address.grid(row=0, column=0, pady=10, sticky=tk.W +
+                 tk.S+tk.N+tk.E, padx=(20, 10))
+    browseBtn = tk.Button(newWindow, text="Browse...", command=submitAddress)
+    browseBtn.grid(row=0, column=1, sticky=tk.W+tk.S +
+                   tk.N+tk.E, pady=10, padx=(0, 20))
+    address.configure(font=myFont)
+    registryContent = tk.Text(newWindow, height=6, width=50)
+    registryContent.grid(row=1, column=0, pady=0,
+                         padx=(20, 10), sticky=tk.W+tk.S +
+                         tk.N+tk.E)
+    registryContent.configure(font=myFont)
+    registrySubmitBtn = tk.Button(
+        newWindow, text="Gửi nội dung", command=submitAddress)
+    registrySubmitBtn.grid(row=1, column=1, sticky=tk.W+tk.S +
+                           tk.N+tk.E, pady=0, padx=(0, 20))
+    labelFix = tk.Label(newWindow, text="Sửa giá trị trực tiếp")
+    labelFix.grid(row=2, column=0, sticky=tk.W,  pady=(3, 3), padx=20)
+
+    dropdown = ttk.Combobox(newWindow, width=27,
+                            textvariable=tk.StringVar())
+    dropdown['values'] = ("Chọn chức năng", "Set value",
+                          "Delete value", "Create key", "Delete key")
+    dropdown.current(0)
+    dropdown.grid(row=3, column=0, sticky=tk.W+tk.S +
+                  tk.N+tk.E, padx=(20, 20), columnspan=2)
+    pathContent = tk.Text(newWindow, height=1, width=35)
+    pathContent.grid(row=4, column=0, pady=10,
+                     padx=(20, 20), sticky=tk.W+tk.S +
+                     tk.N+tk.E, columnspan=2)
+    pathContent.insert(tk.END, 'Đường dẫn')
+    pathContent.configure(font=myFont)
+    nameValueContent = tk.Text(newWindow, height=1, width=35)
+    nameValueContent.grid(row=5, column=0, pady=(0, 10),
+                          padx=(20, 20), sticky=tk.W+tk.S +
+                          tk.N+tk.E, columnspan=2)
+    nameValueContent.insert(tk.END, 'Name value')
+    nameValueContent.configure(font=myFont)
+    valueContent = tk.Text(newWindow, height=1, width=35)
+    valueContent.grid(row=6, column=0, pady=(0, 10),
+                      padx=(20, 20), sticky=tk.W+tk.S +
+                      tk.N+tk.E, columnspan=2)
+    valueContent.insert(tk.END, 'Value')
+    valueContent.configure(font=myFont)
+    typeContent = ttk.Combobox(newWindow, width=15,
+                               textvariable=tk.StringVar())
+    typeContent['values'] = ("Kiểu dữ liệu", "String",
+                             "Binary", "DWORD", "QWORD", "Multi-String", "Extendable String")
+    typeContent.current(0)
+    typeContent.grid(row=7, column=0, sticky=tk.W+tk.S +
+                     tk.N+tk.E, padx=(20), columnspan=2)
+    sendBtn = tk.Button(newWindow, text="Gửi", command=submitAddress)
+    sendBtn.grid(row=8, column=0, pady=10, padx=(20, 10), sticky=tk.W+tk.E)
+    deleteBtn = tk.Button(newWindow, text="Xóa", command=submitAddress)
+    deleteBtn.grid(row=8, column=1, pady=10, padx=(0, 20), sticky=tk.W+tk.E)
     # else:
     #     showConnectionError()
 
@@ -177,7 +238,7 @@ entryIP.insert(tk.END, '127.0.0.1')
 
 ipBtn = tk.Button(root, text="Nhập", command=submitIP)
 ipBtn.grid(row=0, column=2, sticky=tk.W+tk.S +
-           tk.N+tk.E+tk.E, pady=20, padx=(0, 10))
+           tk.N+tk.E, pady=20, padx=(0, 10))
 
 processBtn = tk.Button(root, text="Process running",
                        command=processRunningRequest)
