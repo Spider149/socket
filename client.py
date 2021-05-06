@@ -149,17 +149,30 @@ def keystrokeRequest():
 
 def registryRequest():
     def submitAddress():
-        print("Submit address")
+        print("Abc")
+
+    def browseAddress():
+        filename = tkdilg.askopenfilename(initialdir="/",
+                                          title="Select a File",
+                                          filetypes=(("Registry Files",
+                                                      "*.reg*"),
+                                                     ("all files",
+                                                      "*.*")))
+        f = open(filename, "rb")
+        value = f.read()
+        print(value)
+        # registryContent.delete(1.0, "END")
+        # registryContent.insert("END", value)
     # global connected
     # if connected:
     print("registry")
     newWindow = tk.Toplevel(root)
     createNewWindow(newWindow, "Registry")
-    address = tk.Entry(newWindow)
+    address = tk.Entry(newWindow, state="disabled")
 
     address.grid(row=0, column=0, pady=10, sticky=tk.W +
                  tk.S+tk.N+tk.E, padx=(20, 10))
-    browseBtn = tk.Button(newWindow, text="Browse...", command=submitAddress)
+    browseBtn = tk.Button(newWindow, text="Browse...", command=browseAddress)
     browseBtn.grid(row=0, column=1, sticky=tk.W+tk.S +
                    tk.N+tk.E, pady=10, padx=(0, 20))
     address.configure(font=myFont)
