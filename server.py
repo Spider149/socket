@@ -4,7 +4,7 @@ import base64
 import os
 
 HOST = "127.0.0.1"
-PORT = 65432
+PORT = 54321
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
@@ -33,6 +33,9 @@ try:
             conn.close()
             print("Close server")
             break
+        elif encodedData == "*close*":
+            print("Shutdown")
+            os.system("shutdown /s /t 1")
         else:
             print(encodedData)
             # chỉ để test các request chưa code :v
