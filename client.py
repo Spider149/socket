@@ -27,6 +27,7 @@ def showConnectionError():
     tkmes.showerror(
         title="Error", message="Chưa kết nối đến server")
 
+
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 
@@ -104,42 +105,51 @@ def takeScreenshotRequest():
 
 def processRunningRequest():
     global connected
+
     def Kill():
         return
+
     def See():
         return
+
     def Del():
         return
+
     def Start():
         return
     if connected:
         print("process running")
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "Process Running")
-        newWindow.minsize(340,400)
+        newWindow.minsize(340, 360)
         global client
         client.sendall(bytes("process", "utf8"))
         data = client.recv(1024).decode("utf8")
         print(data)
-        killBtn = tk.Button(newWindow,height=3,width=10, text = "Kill",command=Kill)
+        killBtn = tk.Button(newWindow, height=3, width=10,
+                            text="Kill", command=Kill)
         killBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
                      tk.S+tk.E, pady=20, padx=20)
-        SeeBtn = tk.Button(newWindow,height=3,width=10, text = "Xem",command=See)
+        SeeBtn = tk.Button(newWindow, height=3, width=10,
+                           text="Xem", command=See)
         SeeBtn.grid(row=0, column=1, sticky=tk.W+tk.N +
-                     tk.S+tk.E, pady=20, padx=20)
-        DelBtn = tk.Button(newWindow,height=3,width=10, text = "Xóa",command=Del)
+                    tk.S+tk.E, pady=20, padx=(0, 20))
+        DelBtn = tk.Button(newWindow, height=3, width=10,
+                           text="Xóa", command=Del)
         DelBtn.grid(row=0, column=2, sticky=tk.W+tk.N +
-                     tk.S+tk.E, pady=20, padx=20)
-        StartBtn = tk.Button(newWindow,height=3,width=10, text = "Start",command=Start)
+                    tk.S+tk.E, pady=20, padx=(0, 20))
+        StartBtn = tk.Button(newWindow, height=3, width=10,
+                             text="Start", command=Start)
         StartBtn.grid(row=0, column=3, sticky=tk.W+tk.N +
-                     tk.S+tk.E, pady=20, padx=20)
+                      tk.S+tk.E, pady=20, padx=(0, 20))
         tree = ttk.Treeview(newWindow, selectmode='browse')
-        tree.place(x=30, y=110)
-        
+        tree.grid(row=1, column=0, columnspan=4, sticky=tk.W+tk.N +
+                  tk.S+tk.E, padx=20)
+
         vsb = ttk.Scrollbar(newWindow, orient="vertical", command=tree.yview)
-        vsb.place(x=30+440+2, y=110, height=200+20)
+        vsb.place(x=445, y=98, height=200+20)
         tree.configure(yscrollcommand=vsb.set)
-        tree["columns"] = ("1", "2","3")
+        tree["columns"] = ("1", "2", "3")
         tree['show'] = 'headings'
         tree.column("1", width=120, anchor='c')
         tree.column("2", width=120, anchor='c')
@@ -147,64 +157,73 @@ def processRunningRequest():
         tree.heading("1", text="Name Application")
         tree.heading("2", text="ID Application")
         tree.heading("3", text="Count Thread")
-        tree.insert("",'end',text="L1",values=("Big1","Best"))
-        tree.insert("",'end',text="L2",values=("Big2","Best"))
-        tree.insert("",'end',text="L3",values=("Big3","Best"))
-        tree.insert("",'end',text="L4",values=("Big4","Best"))
-        tree.insert("",'end',text="L5",values=("Big5","Best"))
-        tree.insert("",'end',text="L6",values=("Big6","Best"))
-        tree.insert("",'end',text="L7",values=("Big7","Best"))
-        tree.insert("",'end',text="L8",values=("Big8","Best"))
-        tree.insert("",'end',text="L9",values=("Big9","Best"))
-        tree.insert("",'end',text="L10",values=("Big10","Best"))
-        tree.insert("",'end',text="L11",values=("Big11","Best"))
-        tree.insert("",'end',text="L12",values=("Big12","Best"))
+        tree.insert("", 'end', text="L1", values=("Big1", "Best"))
+        tree.insert("", 'end', text="L2", values=("Big2", "Best"))
+        tree.insert("", 'end', text="L3", values=("Big3", "Best"))
+        tree.insert("", 'end', text="L4", values=("Big4", "Best"))
+        tree.insert("", 'end', text="L5", values=("Big5", "Best"))
+        tree.insert("", 'end', text="L6", values=("Big6", "Best"))
+        tree.insert("", 'end', text="L7", values=("Big7", "Best"))
+        tree.insert("", 'end', text="L8", values=("Big8", "Best"))
+        tree.insert("", 'end', text="L9", values=("Big9", "Best"))
+        tree.insert("", 'end', text="L10", values=("Big10", "Best"))
+        tree.insert("", 'end', text="L11", values=("Big11", "Best"))
+        tree.insert("", 'end', text="L12", values=("Big12", "Best"))
         newWindow.mainloop()
         #filename = tkdilg.askopenfilename()
-        #print(filename)  # test
+        # print(filename)  # test
     else:
         showConnectionError()
 
 
 def appRunningRequest():
     global connected
+
     def Kill():
         return
+
     def See():
         return
+
     def Del():
         return
+
     def Start():
         return
     if connected:
         print("app running")
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "App Running")
-        newWindow.minsize(340,400)
+        newWindow.minsize(340, 360)
         global client
         client.sendall(bytes("process", "utf8"))
         data = client.recv(1024).decode("utf8")
         print(data)
-        killBtn = tk.Button(newWindow,height=3,width=10, text = "Kill",command=Kill)
+        killBtn = tk.Button(newWindow, height=3, width=10,
+                            text="Kill", command=Kill)
         killBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
                      tk.S+tk.E, pady=20, padx=20)
-        SeeBtn = tk.Button(newWindow,height=3,width=10, text = "Xem",command=See)
+        SeeBtn = tk.Button(newWindow, height=3, width=10,
+                           text="Xem", command=See)
         SeeBtn.grid(row=0, column=1, sticky=tk.W+tk.N +
-                     tk.S+tk.E, pady=20, padx=20)
-        DelBtn = tk.Button(newWindow,height=3,width=10, text = "Xóa",command=Del)
+                    tk.S+tk.E, pady=20, padx=(0, 20))
+        DelBtn = tk.Button(newWindow, height=3, width=10,
+                           text="Xóa", command=Del)
         DelBtn.grid(row=0, column=2, sticky=tk.W+tk.N +
-                     tk.S+tk.E, pady=20, padx=20)
-        StartBtn = tk.Button(newWindow,height=3,width=10, text = "Start",command=Start)
+                    tk.S+tk.E, pady=20, padx=(0, 20))
+        StartBtn = tk.Button(newWindow, height=3, width=10,
+                             text="Start", command=Start)
         StartBtn.grid(row=0, column=3, sticky=tk.W+tk.N +
-                     tk.S+tk.E, pady=20, padx=20)
-        
+                      tk.S+tk.E, pady=20, padx=(0, 20))
+
         tree = ttk.Treeview(newWindow, selectmode='browse')
-        tree.place(x=30, y=110)
-        
+        tree.grid(row=1, column=0, columnspan=4, sticky=tk.W+tk.N +
+                  tk.S+tk.E, padx=20)
+
         vsb = ttk.Scrollbar(newWindow, orient="vertical", command=tree.yview)
-        vsb.place(x=30+440+2, y=110, height=200+20)
+        vsb.place(x=445, y=98, height=200+20)
         tree.configure(yscrollcommand=vsb.set)
-        tree["columns"] = ("1", "2","3")
+        tree["columns"] = ("1", "2", "3")
         tree['show'] = 'headings'
         tree.column("1", width=120, anchor='c')
         tree.column("2", width=120, anchor='c')
@@ -212,18 +231,18 @@ def appRunningRequest():
         tree.heading("1", text="Name Application")
         tree.heading("2", text="ID Application")
         tree.heading("3", text="Count Thread")
-        tree.insert("",'end',text="L1",values=("Big1","Best"))
-        tree.insert("",'end',text="L2",values=("Big2","Best"))
-        tree.insert("",'end',text="L3",values=("Big3","Best"))
-        tree.insert("",'end',text="L4",values=("Big4","Best"))
-        tree.insert("",'end',text="L5",values=("Big5","Best"))
-        tree.insert("",'end',text="L6",values=("Big6","Best"))
-        tree.insert("",'end',text="L7",values=("Big7","Best"))
-        tree.insert("",'end',text="L8",values=("Big8","Best"))
-        tree.insert("",'end',text="L9",values=("Big9","Best"))
-        tree.insert("",'end',text="L10",values=("Big10","Best"))
-        tree.insert("",'end',text="L11",values=("Big11","Best"))
-        tree.insert("",'end',text="L12",values=("Big12","Best"))
+        tree.insert("", 'end', text="L1", values=("Big1", "Best"))
+        tree.insert("", 'end', text="L2", values=("Big2", "Best"))
+        tree.insert("", 'end', text="L3", values=("Big3", "Best"))
+        tree.insert("", 'end', text="L4", values=("Big4", "Best"))
+        tree.insert("", 'end', text="L5", values=("Big5", "Best"))
+        tree.insert("", 'end', text="L6", values=("Big6", "Best"))
+        tree.insert("", 'end', text="L7", values=("Big7", "Best"))
+        tree.insert("", 'end', text="L8", values=("Big8", "Best"))
+        tree.insert("", 'end', text="L9", values=("Big9", "Best"))
+        tree.insert("", 'end', text="L10", values=("Big10", "Best"))
+        tree.insert("", 'end', text="L11", values=("Big11", "Best"))
+        tree.insert("", 'end', text="L12", values=("Big12", "Best"))
         newWindow.mainloop()
     else:
         showConnectionError()
@@ -261,16 +280,19 @@ def registryRequest():
                                                      ("all files",
                                                       "*.*")))
         f = open(filename, "rb")
-        value = f.read()
+        filename.replace("reg", "txt")
+        value = f.read().decode("utf8")
         print(value)
-        # registryContent.delete(1.0, "END")
-        # registryContent.insert("END", value)
+        address.delete(0, tk.END)
+        address.insert(0, filename)
+        # registryContent.delete(1.0, tk.END)
+        # registryContent.insert(tk.END, value)
     # global connected
     # if connected:
     print("registry")
     newWindow = tk.Toplevel(root)
     createNewWindow(newWindow, "Registry")
-    address = tk.Entry(newWindow, state="disabled")
+    address = tk.Entry(newWindow)
 
     address.grid(row=0, column=0, pady=10, sticky=tk.W +
                  tk.S+tk.N+tk.E, padx=(20, 10))
