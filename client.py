@@ -8,6 +8,7 @@ import socket
 import base64
 import os
 import shutil as sm
+import psutil
 
 root = tk.Tk()
 root.title("Client")
@@ -101,17 +102,60 @@ def takeScreenshotRequest():
     else:
         showConnectionError()
 
+def Show_Error():
+    tkmes.showerror(
+        title="Error", message="Lỗi")
 
 def processRunningRequest():
     global connected
     def Kill():
-        return
+        killWindow = tk.Toplevel(newWindow)
+        createNewWindow(killWindow, "Kill")
+        killWindow.minsize(30,50)
+        def kill_final():
+            ID = IDkill.get("1.0",tk.END)
+            if (True):
+                pass
+            else:
+                Show_Error()
+            return
+            # Dò id để kill
+        IDkill = tk.Text(killWindow, height=1, width=50)
+        IDkill.grid(row=0, column=0, pady=10,
+        padx=(20, 20), sticky=tk.W+tk.S +
+        tk.N+tk.E)
+        IDkill.insert(tk.END, 'Nhập ID')
+        IDkill.configure(font=myFont)
+        killbtn_final = tk.Button(killWindow,height=1, width= 12 , text = "Kill",command=kill_final)
+        killbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
+                     tk.S+tk.E, pady=10, padx=(20,20))
+        killWindow.mainloop()
     def See():
         return
     def Del():
         return
     def Start():
-        return
+        startwindow = tk.Toplevel(newWindow)
+        createNewWindow(startwindow, "Start")
+        startwindow.minsize(30,50)
+        def Start_btn():
+            ID = NameStart.get("1.0",tk.END)
+            if (True):
+                pass
+            else:
+                Show_Error()
+            return
+            # Dò id để kill
+        NameStart = tk.Text(startwindow, height=1, width=50)
+        NameStart.grid(row=0, column=0, pady=10,
+        padx=(20, 20), sticky=tk.W+tk.S +
+        tk.N+tk.E)
+        NameStart.insert(tk.END, 'Nhập tên')
+        NameStart.configure(font=myFont)
+        Startbtn_final = tk.Button(startwindow,height=1, width= 12 , text = "Start",command=Start_btn)
+        Startbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
+                     tk.S+tk.E, pady=10, padx=(20,20))
+        startwindow.mainloop()
     if connected:
         print("process running")
         newWindow = tk.Toplevel(root)
@@ -169,20 +213,60 @@ def processRunningRequest():
 def appRunningRequest():
     global connected
     def Kill():
-        return
+        killWindow = tk.Toplevel(newWindow)
+        createNewWindow(killWindow, "Kill")
+        killWindow.minsize(30,50)
+        def kill_final():
+            ID = IDkill.get("1.0",tk.END)
+            if (True):
+                pass
+            else:
+                Show_Error()
+            return
+            # Dò id để kill
+        IDkill = tk.Text(killWindow, height=1, width=50)
+        IDkill.grid(row=0, column=0, pady=10,
+        padx=(20, 20), sticky=tk.W+tk.S +
+        tk.N+tk.E)
+        IDkill.insert(tk.END, 'Nhập ID')
+        IDkill.configure(font=myFont)
+        killbtn_final = tk.Button(killWindow,height=1, width= 12 , text = "Kill",command=kill_final)
+        killbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
+                     tk.S+tk.E, pady=10, padx=(20,20))
+        killWindow.mainloop()
     def See():
         return
     def Del():
         return
     def Start():
-        return
+        startwindow = tk.Toplevel(newWindow)
+        createNewWindow(startwindow, "Start")
+        startwindow.minsize(30,50)
+        def Start_btn():
+            ID = NameStart.get("1.0",tk.END)
+            if (True):
+                pass
+            else:
+                Show_Error()
+            return
+            # Dò id để kill
+        NameStart = tk.Text(startwindow, height=1, width=50)
+        NameStart.grid(row=0, column=0, pady=10,
+        padx=(20, 20), sticky=tk.W+tk.S +
+        tk.N+tk.E)
+        NameStart.insert(tk.END, 'Nhập tên')
+        NameStart.configure(font=myFont)
+        Startbtn_final = tk.Button(startwindow,height=1, width= 12 , text = "Start",command=Start_btn)
+        Startbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
+                     tk.S+tk.E, pady=10, padx=(20,20))
+        startwindow.mainloop()
     if connected:
         print("app running")
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "App Running")
         newWindow.minsize(340,400)
         global client
-        client.sendall(bytes("process", "utf8"))
+        client.sendall(bytes("app running", "utf8"))
         data = client.recv(1024).decode("utf8")
         print(data)
         killBtn = tk.Button(newWindow,height=3,width=10, text = "Kill",command=Kill)
