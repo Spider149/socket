@@ -89,7 +89,6 @@ def takeScreenshotRequest():
     global connected
     if connected:
         newWindow = tk.Toplevel(root)
-        newWindow.protocol("WM_DELETE_WINDOW", on_closing1)
         createNewWindow(newWindow, "Screenshot")
         snapBtn = tk.Button(newWindow, text="Chụp",
                             command=takeScreen)
@@ -113,13 +112,16 @@ def Show_Error():
     tkmes.showerror(
         title="Error", message="Lỗi")
 
+
 def processRunningRequest():
     global connected
+
     def Send_Exit():
         print("Khong phai loi cua t")
         if connected:
             newWindow.destroy()
-            client.sendall(bytes("-exit-","utf8"))
+            client.sendall(bytes("-exit-", "utf8"))
+
     def Kill():
         killWindow = tk.Toplevel(newWindow)
         createNewWindow(killWindow, "Kill")
@@ -151,16 +153,18 @@ def processRunningRequest():
         i = 0
         client.sendall(bytes("see", "utf8"))
         data_see = client.recv(1024*1024).decode("utf8")
-        #print(data_see)
+        # print(data_see)
         str_recv = data_see.split("_a_")
         for line in str_recv:
-            i+=1
+            i += 1
             value = line.split("__")
             name = value[0]
             pid = value[1]
             num_thread = value[2]
-            tree.insert("",'end', text="L"+str(i), values=(name,pid,num_thread))
+            tree.insert("", 'end', text="L"+str(i),
+                        values=(name, pid, num_thread))
         check_see = True
+
     def Del():
         global check_see
         if (not check_see):
@@ -169,7 +173,7 @@ def processRunningRequest():
         for item in child:
             tree.delete(item)
         check_see = False
-        
+
     def Start():
         startwindow = tk.Toplevel(newWindow)
         createNewWindow(startwindow, "Start")
@@ -235,7 +239,7 @@ def processRunningRequest():
         tree.heading("1", text="Name Application")
         tree.heading("2", text="ID Application")
         tree.heading("3", text="Count Thread")
-        newWindow.protocol("VM_DELETE_WINDOW",Send_Exit)
+        newWindow.protocol("VM_DELETE_WINDOW", Send_Exit)
         print(" end cmnr")
         newWindow.mainloop()
         #filename = tkdilg.askopenfilename()
@@ -380,7 +384,7 @@ def keystrokeRequest():
 
 def registryRequest():
     def submitAddress():
-        print("Abc")
+        print("a")
 
     def browseAddress():
         filename = tkdilg.askopenfilename(initialdir="/",
@@ -408,35 +412,33 @@ def registryRequest():
     def sendRegistryRequest():
         global client
         currentSelect = dropdown.current()
-        if currentSelect == 1:
+        if currentSelect == 0:
             client.sendall(bytes("1"+pathContent.get("1.0", tk.END)[:-1] +
                            "***"+nameValueContent.get("1.0", tk.END)[:-1], "utf8"))
-            rawData = client.recv(1024)
-            data = None
-            try:
-                data = rawData.decode("utf8")+"\n"
-            except:
-                data = ""
-                for byte in rawData:
-                    data = data+str(byte)+" "
-                data += "\n"
-            showResultContent(data)
-        elif currentSelect == 2:
+        elif currentSelect == 1:
             client.sendall(bytes("2"+pathContent.get("1.0", tk.END)
                            [:-1]+"**"+nameValueContent.get("1.0", tk.END)[:-1]+"***"+valueContent.get("1.0", tk.END)[:-1]+"****"+typeContent.get(), "utf8"))
-            data = client.recv(1024).decode("utf8")
-            showResultContent(data)
+        elif currentSelect == 2:
+            client.sendall(bytes("3"+pathContent.get("1.0", tk.END)[:-1] +
+                           "***"+nameValueContent.get("1.0", tk.END)[:-1], "utf8"))
+        elif currentSelect == 3:
+            client.sendall(
+                bytes("4"+pathContent.get("1.0", tk.END)[:-1], "utf8"))
+        elif currentSelect == 4:
+            client.sendall(
+                bytes("5"+pathContent.get("1.0", tk.END)[:-1], "utf8"))
+        data = client.recv(1024).decode("utf8")+"\n"
+        showResultContent(data)
 
     def updateUI(self):
         currentValue = dropdown.current()
-        if currentValue == 1:  # get value
+        if currentValue == 0:  # get value
             nameValueContent.grid(row=5, column=0, pady=(0, 10),
                                   padx=(20, 20), sticky=tk.W+tk.S +
                                   tk.N+tk.E, columnspan=2)
             valueContent.grid_remove()
             typeContent.grid_remove()
-            pass
-        elif currentValue == 2:  # set value
+        elif currentValue == 1:  # set value
             nameValueContent.grid(row=5, column=0, pady=(0, 10),
                                   padx=(20, 20), sticky=tk.W+tk.S +
                                   tk.N+tk.E, columnspan=2)
@@ -445,88 +447,85 @@ def registryRequest():
                               tk.N+tk.E, columnspan=2)
             typeContent.grid(row=7, column=0, sticky=tk.W+tk.S +
                              tk.N+tk.E, padx=(20), columnspan=2)
-            pass
-        elif currentValue == 3:  # delete value
+        elif currentValue == 2:  # delete value
             nameValueContent.grid(row=5, column=0, pady=(0, 10),
                                   padx=(20, 20), sticky=tk.W+tk.S +
                                   tk.N+tk.E, columnspan=2)
             valueContent.grid_remove()
             typeContent.grid_remove()
-            pass
-        elif currentValue == 4 or currentValue == 5:  # create key and #delete key
+        elif currentValue == 3 or currentValue == 4:  # create key and #delete key
             nameValueContent.grid_remove()
             valueContent.grid_remove()
             typeContent.grid_remove()
-            pass
-        else:
-            pass
-        print(currentValue)
-    # global connected
-    # if connected:
-    print("registry")
-    newWindow = tk.Toplevel(root)
-    createNewWindow(newWindow, "Registry")
-    newWindow.minsize(485, 460)
-    address = tk.Entry(newWindow, font=myFont)
 
-    address.grid(row=0, column=0, pady=10, sticky=tk.W +
-                 tk.S+tk.N+tk.E, padx=(20, 10))
-    browseBtn = tk.Button(newWindow, text="Browse...", command=browseAddress)
-    browseBtn.grid(row=0, column=1, sticky=tk.W+tk.S +
-                   tk.N+tk.E, pady=10, padx=(0, 20))
-    registryContent = tk.Text(newWindow, height=6, width=50, font=myFont)
-    registryContent.grid(row=1, column=0, pady=0,
-                         padx=(20, 10), sticky=tk.W+tk.S +
-                         tk.N+tk.E)
-    registrySubmitBtn = tk.Button(
-        newWindow, text="Gửi nội dung", command=submitAddress)
-    registrySubmitBtn.grid(row=1, column=1, sticky=tk.W+tk.S +
-                           tk.N+tk.E, pady=0, padx=(0, 20))
-    labelFix = tk.Label(newWindow, text="Sửa giá trị trực tiếp")
-    labelFix.grid(row=2, column=0, sticky=tk.W,  pady=(3, 3), padx=20)
+    global connected
+    if connected:
+        newWindow = tk.Toplevel(root)
+        createNewWindow(newWindow, "Registry")
+        newWindow.minsize(485, 460)
+        address = tk.Entry(newWindow, font=myFont)
 
-    dropdown = ttk.Combobox(newWindow, width=27,
-                            textvariable=tk.StringVar())
-    dropdown['values'] = ("Chọn chức năng", "Get value", "Set value",
-                          "Delete value", "Create key", "Delete key")
-    dropdown.current(0)
-    dropdown.grid(row=3, column=0, sticky=tk.W+tk.S +
-                  tk.N+tk.E, padx=(20, 20), columnspan=2)
-    dropdown.bind("<<ComboboxSelected>>", updateUI)
-    pathContent = tk.Text(newWindow, height=1, width=35, font=myFont)
-    pathContent.grid(row=4, column=0, pady=10,
-                     padx=(20, 20), sticky=tk.W+tk.S +
-                     tk.N+tk.E, columnspan=2)
-    pathContent.insert(tk.END, 'HKEY_CURRENT_CONFIG\\test\\test-a-2\\test-c-1')
-    nameValueContent = tk.Text(newWindow, height=1, width=35, font=myFont)
-    nameValueContent.grid(row=5, column=0, pady=(0, 10),
+        address.grid(row=0, column=0, pady=10, sticky=tk.W +
+                     tk.S+tk.N+tk.E, padx=(20, 10))
+        browseBtn = tk.Button(newWindow, text="Browse...",
+                              command=browseAddress)
+        browseBtn.grid(row=0, column=1, sticky=tk.W+tk.S +
+                       tk.N+tk.E, pady=10, padx=(0, 20))
+        registryContent = tk.Text(newWindow, height=6, width=50, font=myFont)
+        registryContent.grid(row=1, column=0, pady=0,
+                             padx=(20, 10), sticky=tk.W+tk.S +
+                             tk.N+tk.E)
+        registrySubmitBtn = tk.Button(
+            newWindow, text="Gửi nội dung", command=submitAddress)
+        registrySubmitBtn.grid(row=1, column=1, sticky=tk.W+tk.S +
+                               tk.N+tk.E, pady=0, padx=(0, 20))
+        labelFix = tk.Label(newWindow, text="Sửa giá trị trực tiếp")
+        labelFix.grid(row=2, column=0, sticky=tk.W,  pady=(3, 3), padx=20)
+
+        dropdown = ttk.Combobox(newWindow, width=27,
+                                textvariable=tk.StringVar())
+        dropdown['values'] = ("Get value", "Set value",
+                              "Delete value", "Create key", "Delete key")
+        dropdown.grid(row=3, column=0, sticky=tk.W+tk.S +
+                      tk.N+tk.E, padx=(20, 20), columnspan=2)
+        dropdown.set("Chọn chức năng")
+        dropdown.bind("<<ComboboxSelected>>", updateUI)
+        pathContent = tk.Text(newWindow, height=1, width=35, font=myFont)
+        pathContent.grid(row=4, column=0, pady=10,
+                         padx=(20, 20), sticky=tk.W+tk.S +
+                         tk.N+tk.E, columnspan=2)
+        pathContent.insert(
+            tk.END, 'HKEY_CURRENT_CONFIG\\test\\test-a-2\\test-c-1')
+        nameValueContent = tk.Text(newWindow, height=1, width=35, font=myFont)
+        nameValueContent.grid(row=5, column=0, pady=(0, 10),
+                              padx=(20, 20), sticky=tk.W+tk.S +
+                              tk.N+tk.E, columnspan=2)
+        nameValueContent.insert(tk.END, 'Name value')
+        valueContent = tk.Text(newWindow, height=1, width=35, font=myFont)
+        valueContent.grid(row=6, column=0, pady=(0, 10),
                           padx=(20, 20), sticky=tk.W+tk.S +
                           tk.N+tk.E, columnspan=2)
-    nameValueContent.insert(tk.END, 'Name value')
-    valueContent = tk.Text(newWindow, height=1, width=35, font=myFont)
-    valueContent.grid(row=6, column=0, pady=(0, 10),
-                      padx=(20, 20), sticky=tk.W+tk.S +
-                      tk.N+tk.E, columnspan=2)
-    valueContent.insert(tk.END, 'Value')
-    typeContent = ttk.Combobox(newWindow, width=15,
-                               textvariable=tk.StringVar())
-    typeContent['values'] = ("Kiểu dữ liệu", "String",
-                             "Binary", "DWORD", "QWORD", "Multi-String", "Extendable String")
-    typeContent.current(0)
-    typeContent.grid(row=7, column=0, sticky=tk.W+tk.S +
-                     tk.N+tk.E, padx=(20), columnspan=2)
-    showResult = tk.Text(newWindow, height=6, width=1,
-                         font=myFont, state="disabled")
-    showResult.grid(row=8, column=0, pady=(10, 0),
-                    padx=(20, 20), sticky=tk.W+tk.S +
-                    tk.N+tk.E, columnspan=2)
-    sendBtn = tk.Button(newWindow, text="Gửi", command=sendRegistryRequest)
-    sendBtn.grid(row=9, column=0, pady=10, padx=(20, 10), sticky=tk.W+tk.E)
-    deleteBtn = tk.Button(newWindow, text="Xóa",
-                          command=deleteShowResultContent)
-    deleteBtn.grid(row=9, column=1, pady=10, padx=(0, 20), sticky=tk.W+tk.E)
-    # else:
-    #     showConnectionError()
+        valueContent.insert(tk.END, 'Value')
+        typeContent = ttk.Combobox(newWindow, width=15,
+                                   textvariable=tk.StringVar())
+        typeContent['values'] = (
+            "String", "Binary", "DWORD", "QWORD", "Multi-String", "Extendable String")
+        typeContent.set("Kiểu dữ liệu")
+        typeContent.grid(row=7, column=0, sticky=tk.W+tk.S +
+                         tk.N+tk.E, padx=(20), columnspan=2)
+        showResult = tk.Text(newWindow, height=6, width=1,
+                             font=myFont, state="disabled")
+        showResult.grid(row=8, column=0, pady=(10, 0),
+                        padx=(20, 20), sticky=tk.W+tk.S +
+                        tk.N+tk.E, columnspan=2)
+        sendBtn = tk.Button(newWindow, text="Gửi", command=sendRegistryRequest)
+        sendBtn.grid(row=9, column=0, pady=10, padx=(20, 10), sticky=tk.W+tk.E)
+        deleteBtn = tk.Button(newWindow, text="Xóa",
+                              command=deleteShowResultContent)
+        deleteBtn.grid(row=9, column=1, pady=10,
+                       padx=(0, 20), sticky=tk.W+tk.E)
+    else:
+        showConnectionError()
 
 
 def exitRequest():
