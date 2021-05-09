@@ -3,6 +3,7 @@ from PIL import ImageGrab
 import base64
 import os
 import winreg
+import psutil
 
 HOST = "127.0.0.1"
 PORT = 54321
