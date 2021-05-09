@@ -15,6 +15,7 @@ root.title("Client")
 
 root.minsize(340, 250)
 connected = False
+check_see = False
 myFont = font.Font(family="VnArial", size=9)
 
 
@@ -108,10 +109,13 @@ def Show_Error():
     tkmes.showerror(
         title="Error", message="Lỗi")
 
-
 def processRunningRequest():
     global connected
-
+    def Send_Exit():
+        print("Khong phai loi cua t")
+        if connected:
+            newWindow.destroy()
+            client.sendall(bytes("-exit-","utf8"))
     def Kill():
         killWindow = tk.Toplevel(newWindow)
         createNewWindow(killWindow, "Kill")
@@ -138,11 +142,31 @@ def processRunningRequest():
         killWindow.mainloop()
 
     def See():
-        return
-
+        global check_see
+        if (check_see):
+            return
+        i = 0
+        client.sendall(bytes("see", "utf8"))
+        data_see = client.recv(1024*1024).decode("utf8")
+        #print(data_see)
+        str_recv = data_see.split("_a_")
+        for line in str_recv:
+            i+=1
+            value = line.split("__")
+            name = value[0]
+            pid = value[1]
+            num_thread = value[2]
+            tree.insert("",'end', text="L"+str(i), values=(name,pid,num_thread))
+        check_see = True
     def Del():
-        return
-
+        global check_see
+        if (not check_see):
+            return
+        child = tree.get_children()
+        for item in child:
+            tree.delete(item)
+        check_see = False
+        
     def Start():
         startwindow = tk.Toplevel(newWindow)
         createNewWindow(startwindow, "Start")
@@ -168,6 +192,8 @@ def processRunningRequest():
                             tk.S+tk.E, pady=10, padx=(20, 20))
         startwindow.mainloop()
     if connected:
+        global check_see
+        check_see = False
         print("process running")
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "Process Running")
@@ -197,7 +223,7 @@ def processRunningRequest():
                   tk.S+tk.E, padx=20)
 
         vsb = ttk.Scrollbar(newWindow, orient="vertical", command=tree.yview)
-        vsb.place(x=445, y=98, height=200+20)
+        vsb.place(x=445, y=116, height=200+27)
         tree.configure(yscrollcommand=vsb.set)
         tree["columns"] = ("1", "2", "3")
         tree['show'] = 'headings'
@@ -207,18 +233,8 @@ def processRunningRequest():
         tree.heading("1", text="Name Application")
         tree.heading("2", text="ID Application")
         tree.heading("3", text="Count Thread")
-        tree.insert("", 'end', text="L1", values=("Big1", "Best"))
-        tree.insert("", 'end', text="L2", values=("Big2", "Best"))
-        tree.insert("", 'end', text="L3", values=("Big3", "Best"))
-        tree.insert("", 'end', text="L4", values=("Big4", "Best"))
-        tree.insert("", 'end', text="L5", values=("Big5", "Best"))
-        tree.insert("", 'end', text="L6", values=("Big6", "Best"))
-        tree.insert("", 'end', text="L7", values=("Big7", "Best"))
-        tree.insert("", 'end', text="L8", values=("Big8", "Best"))
-        tree.insert("", 'end', text="L9", values=("Big9", "Best"))
-        tree.insert("", 'end', text="L10", values=("Big10", "Best"))
-        tree.insert("", 'end', text="L11", values=("Big11", "Best"))
-        tree.insert("", 'end', text="L12", values=("Big12", "Best"))
+        newWindow.protocol("VM_DELETE_WINDOW",Send_Exit)
+        print(" end cmnr")
         newWindow.mainloop()
         #filename = tkdilg.askopenfilename()
         # print(filename)  # test
