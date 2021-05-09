@@ -37,7 +37,7 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def submitIP():
     host = entryIP.get()
-    port = 54321
+    port = 65432
     server_address = (host, port)
     global client
     try:
@@ -111,7 +111,12 @@ def takeScreenshotRequest():
 def Show_Error():
     tkmes.showerror(
         title="Error", message="Lỗi")
+    
+def Show_Kill_Process_Comp():
+    tkmes.showinfo(title="Kill Complete", message = "Đã diệt process")
 
+def Show_Start_Process_Comp():
+    tkmes.showinfo(title="Kill Complete", message = "Process đã được bật")
 
 def processRunningRequest():
     global connected
@@ -128,12 +133,17 @@ def processRunningRequest():
         killWindow.minsize(30, 50)
 
         def kill_final():
-            ID = IDkill.get("1.0", tk.END)
-            if (True):
-                pass
+            ID = IDkill.get("1.0", tk.END)[:-1]
+            if (ID.isnumeric()):
+                client.sendall(bytes("kill_process","utf8"))
+                client.sendall(bytes(ID,"utf8"))
+                kill_comp = client.recv(1024).decode("utf8")
+                if (kill_comp=="kill_success"):
+                    Show_Kill_Process_Comp()
+                else:
+                    Show_Error()
             else:
                 Show_Error()
-            return
             # Dò id để kill
         IDkill = tk.Text(killWindow, height=1, width=50, font=myFont)
         IDkill.grid(row=0, column=0, pady=10,
@@ -151,7 +161,7 @@ def processRunningRequest():
         if (check_see):
             return
         i = 0
-        client.sendall(bytes("see", "utf8"))
+        client.sendall(bytes("see_process", "utf8"))
         data_see = client.recv(1024*1024).decode("utf8")
         # print(data_see)
         str_recv = data_see.split("_a_")
@@ -180,12 +190,14 @@ def processRunningRequest():
         startwindow.minsize(30, 50)
 
         def Start_btn():
-            ID = NameStart.get("1.0", tk.END)
-            if (True):
-                pass
+            ID = NameStart.get("1.0", tk.END)[:-1]
+            client.sendall(bytes("start_process","utf8"))
+            client.sendall(bytes(ID,"utf8"))
+            start_comp = client.recv(1024).decode("utf8")
+            if (start_comp=="start_success"):
+                Show_Start_Process_Comp()
             else:
                 Show_Error()
-            return
             # Dò id để kill
         NameStart = tk.Text(startwindow, height=1, width=50, font=myFont)
         NameStart.grid(row=0, column=0, pady=10,
@@ -206,8 +218,8 @@ def processRunningRequest():
         newWindow.minsize(340, 360)
         global client
         client.sendall(bytes("process", "utf8"))
-        data = client.recv(1024).decode("utf8")
-        print(data)
+        #data = client.recv(1024).decode("utf8")
+        #print(data)
         killBtn = tk.Button(newWindow, height=3, width=10,
                             text="Kill", command=Kill)
         killBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
@@ -239,14 +251,18 @@ def processRunningRequest():
         tree.heading("1", text="Name Application")
         tree.heading("2", text="ID Application")
         tree.heading("3", text="Count Thread")
-        newWindow.protocol("VM_DELETE_WINDOW", Send_Exit)
-        print(" end cmnr")
         newWindow.mainloop()
         #filename = tkdilg.askopenfilename()
         # print(filename)  # test
     else:
         showConnectionError()
 
+
+def Show_Start_App_Comp():
+    tkmes.showinfo(title="Start Complete", message = "App đã được bật")
+    
+def Show_Kill_App_Comp():
+    tkmes.showinfo(title="Kill Complete", message = "App đã đươc diệt")
 
 def appRunningRequest():
     global connected
@@ -257,12 +273,17 @@ def appRunningRequest():
         killWindow.minsize(30, 50)
 
         def kill_final():
-            ID = IDkill.get("1.0", tk.END)
-            if (True):
-                pass
+            ID = IDkill.get("1.0", tk.END)[:-1]
+            if (ID.isnumeric()):
+                client.sendall(bytes("kill_app","utf8"))
+                client.sendall(bytes(ID,"utf8"))
+                kill_comp = client.recv(1024).decode("utf8")
+                if (kill_comp=="kill_success"):
+                    Show_Kill_App_Comp()
+                else:
+                    Show_Error()
             else:
                 Show_Error()
-            return
             # Dò id để kill
         IDkill = tk.Text(killWindow, height=1, width=50, font=myFont)
         IDkill.grid(row=0, column=0, pady=10,
@@ -276,24 +297,47 @@ def appRunningRequest():
         killWindow.mainloop()
 
     def See():
-        return
+        global check_see
+        if (check_see):
+            return
+        i = 0
+        client.sendall(bytes("see_app", "utf8"))
+        data_see = client.recv(1024*1024).decode("utf8")
+        # print(data_see)
+        str_recv = data_see.split("_a_")
+        for line in str_recv:
+            i += 1
+            value = line.split("__")
+            name = value[0]
+            pid = value[1]
+            num_thread = value[2]
+            tree.insert("", 'end', text="L"+str(i),
+                        values=(name, pid, num_thread))
+        check_see = True
 
     def Del():
-        return
-
+        global check_see
+        if (not check_see):
+            return
+        child = tree.get_children()
+        for item in child:
+            tree.delete(item)
+        check_see = False
+        
     def Start():
         startwindow = tk.Toplevel(newWindow)
         createNewWindow(startwindow, "Start")
         startwindow.minsize(30, 50)
 
         def Start_btn():
-            ID = NameStart.get("1.0", tk.END)
-            if (True):
-                pass
+            ID = NameStart.get("1.0", tk.END)[:-1]
+            client.sendall(bytes("start_app","utf8"))
+            client.sendall(bytes(ID,"utf8"))
+            start_comp = client.recv(1024).decode("utf8")
+            if (start_comp=="start_success"):
+                Show_Start_App_Comp()
             else:
                 Show_Error()
-            return
-            # Dò id để kill
         NameStart = tk.Text(startwindow, height=1, width=50, font=myFont)
         NameStart.grid(row=0, column=0, pady=10,
                        padx=(20, 20), sticky=tk.W+tk.S +
@@ -305,14 +349,16 @@ def appRunningRequest():
                             tk.S+tk.E, pady=10, padx=(20, 20))
         startwindow.mainloop()
     if connected:
+        global check_see
+        check_see = False
         print("app running")
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "App Running")
         newWindow.minsize(340, 360)
         global client
         client.sendall(bytes("app running", "utf8"))
-        data = client.recv(1024).decode("utf8")
-        print(data)
+        #data = client.recv(1024).decode("utf8")
+        #print(data)
         killBtn = tk.Button(newWindow, height=3, width=10,
                             text="Kill", command=Kill)
         killBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
@@ -345,18 +391,6 @@ def appRunningRequest():
         tree.heading("1", text="Name Application")
         tree.heading("2", text="ID Application")
         tree.heading("3", text="Count Thread")
-        tree.insert("", 'end', text="L1", values=("Big1", "Best"))
-        tree.insert("", 'end', text="L2", values=("Big2", "Best"))
-        tree.insert("", 'end', text="L3", values=("Big3", "Best"))
-        tree.insert("", 'end', text="L4", values=("Big4", "Best"))
-        tree.insert("", 'end', text="L5", values=("Big5", "Best"))
-        tree.insert("", 'end', text="L6", values=("Big6", "Best"))
-        tree.insert("", 'end', text="L7", values=("Big7", "Best"))
-        tree.insert("", 'end', text="L8", values=("Big8", "Best"))
-        tree.insert("", 'end', text="L9", values=("Big9", "Best"))
-        tree.insert("", 'end', text="L10", values=("Big10", "Best"))
-        tree.insert("", 'end', text="L11", values=("Big11", "Best"))
-        tree.insert("", 'end', text="L12", values=("Big12", "Best"))
         newWindow.mainloop()
     else:
         showConnectionError()

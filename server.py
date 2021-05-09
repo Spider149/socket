@@ -4,9 +4,10 @@ import base64
 import os
 import winreg
 import psutil
+import subprocess
 
 HOST = "127.0.0.1"
-PORT = 54321
+PORT = 65432
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
@@ -140,40 +141,108 @@ try:
                 conn.sendall(bytes("Lỗi", "utf8"))
 
         elif encodedData == "process":
-            conn.sendall(bytes("continue", "utf8"))
-            data_act = conn.recv(1024)
-            encode_act = data_act.decode("utf8")
-            print(encode_act)
-            while True:
-                if (encode_act == "kill"):
-                    x = 0
-                elif (encode_act == "see"):
-                    res_final = []
-                    for pro in psutil.process_iter():
-                        # conn.sendall(bytes("during","utf8"))
-                        res = str(pro.name().replace('.exe', '')) + "__" + \
-                            str(pro.pid) + "__" + str(pro.num_threads())
-                        res_final.append(res)
-                        #check_recv = conn.recv(1024)
-                    str_send = "_a_".join(res_final)
-                    conn.sendall(bytes(str_send, "utf8"))
-                elif (encode_act == "del"):
-                    x = 0
-                elif (encode_act == "start"):
-                    x = 0
-                elif (encode_act == "-exit-"):
+            continue
+        elif encodedData == "see_process":
+            res_final = []
+            for pro in psutil.process_iter():
+                # conn.sendall(bytes("during","utf8"))
+                res = str(pro.name().replace('.exe', '')) + "__" + \
+                str(pro.pid) + "__" + str(pro.num_threads())
+                res_final.append(res)
+                #check_recv = conn.recv(1024)
+            str_send = "_a_".join(res_final)
+            conn.sendall(bytes(str_send, "utf8"))
+        elif encodedData == "kill_process":
+            ID_str = conn.recv(1024).decode("utf8")
+            ID_kill = int(ID_str)
+            #print(ID_kill, " da chuyen")
+            check_kill_comp = False
+            for pro in psutil.process_iter():
+                if pro.pid==ID_kill:
+                    pro.kill()
+                    print(pro.pid)
+                    conn.sendall(bytes("kill_success","utf8"))
+                    check_kill_comp = True
                     break
-                # print("pause")
-                # conn.sendall(bytes("continue","utf8"))
-                #print("pass pause")
-                data_act = conn.recv(1024)
-                encode_act = data_act.decode("utf8")
-                print(encode_act, " oki ne")
-                if (len(encode_act) == 0):
-                    break
-            print(encodedData)
-            # chỉ để test các request chưa code :v
-            conn.sendall(bytes(encodedData+"ed", "utf8"))
+            if not check_kill_comp:
+                conn.sendall(bytes("kill_fail","utf8"))
+            
+        elif encodedData == "start_process":
+            Name_start = conn.recv(1024).decode("utf8")
+            Command_Start = "start " + Name_start
+            try:
+                os.system(Command_Start)
+                conn.sendall(bytes("start_success","utf8"))
+            except:
+                conn.sendall(bytes("start_error","utf8"))
+        elif encodedData == "app running":
+            continue
+        elif encodedData == "see_app":
+            cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
+            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+            res = []
+            for line in proc.stdout:
+                if line.rstrip():
+                    # only print lines that are not empty
+                    # decode() is necessary to get rid of the binary string (b')
+                    # rstrip() to remove `\r\n`
+                    name = line.decode().rstrip()
+                    res.append(name)
+            res = res[2:]
+            ID_res = []
+            for text in res:
+                #print(text[0:text.find(" ",0,len(text))]) 
+                ID_res.append(int(text[text.find(" ",0,len(text)):len(text)].strip(" ")))
+            res_final = []
+            for pro in psutil.process_iter():
+                # conn.sendall(bytes("during","utf8"))
+                if pro.pid in ID_res:
+                    res = str(pro.name().replace('.exe', '')) + "__" + \
+                        str(pro.pid) + "__" + str(pro.num_threads())
+                    res_final.append(res)
+                #check_recv = conn.recv(1024)
+            str_send = "_a_".join(res_final)
+            conn.sendall(bytes(str_send, "utf8"))
+        elif encodedData == "kill_app":
+            cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
+            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+            res = []
+            for line in proc.stdout:
+                if line.rstrip():
+                    # only print lines that are not empty
+                    # decode() is necessary to get rid of the binary string (b')
+                    # rstrip() to remove `\r\n`
+                    name = line.decode().rstrip()
+                    res.append(name)
+            res = res[2:]
+            ID_res = []
+            for text in res:
+                #print(text[0:text.find(" ",0,len(text))]) 
+                ID_res.append(int(text[text.find(" ",0,len(text)):len(text)].strip(" ")))
+            ID_str = conn.recv(1024).decode("utf8")
+            ID_kill = int(ID_str)
+            #print(ID_kill, " da chuyen")
+            if ID_kill in ID_res:
+                check_kill_comp = False
+                for pro in psutil.process_iter():
+                    if pro.pid==ID_kill:
+                        pro.kill()
+                        print(pro.pid)
+                        conn.sendall(bytes("kill_success","utf8"))
+                        check_kill_comp = True
+                        break
+                if not check_kill_comp:
+                    conn.sendall(bytes("kill_fail","utf8"))
+            else:
+                conn.sendall(bytes("kill_fail","utf8"))
+        elif encodedData == "start_app":
+            Name_start = conn.recv(1024).decode("utf8")
+            Command_Start = "start " + Name_start
+            try:
+                os.system(Command_Start)
+                conn.sendall(bytes("start_success","utf8"))
+            except:
+                conn.sendall(bytes("start_error","utf8"))            
         else:
             print(encodedData)
             # chỉ để test các request chưa code :v
