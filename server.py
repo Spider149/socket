@@ -114,7 +114,41 @@ try:
                 conn.sendall(bytes("Đã sửa giá trị thành công", "utf8"))
             except:
                 conn.sendall(bytes("Lỗi\n", "utf8"))
-
+        elif encodedData == "process":
+            conn.sendall(bytes("continue", "utf8"))
+            data_act = conn.recv(1024)
+            encode_act = data_act.decode("utf8")
+            print(encode_act)
+            while True:
+                if (encode_act == "kill"):
+                    x = 0
+                elif (encode_act == "see"):
+                    res_final = []
+                    for pro in psutil.process_iter():
+                        # conn.sendall(bytes("during","utf8"))
+                        res = str(pro.name().replace('.exe', '')) + "__" + \
+                            str(pro.pid) + "__" + str(pro.num_threads())
+                        res_final.append(res)
+                        #check_recv = conn.recv(1024)
+                    str_send = "_a_".join(res_final)
+                    conn.sendall(bytes(str_send, "utf8"))
+                elif (encode_act == "del"):
+                    x = 0
+                elif (encode_act == "start"):
+                    x = 0
+                elif (encode_act == "-exit-"):
+                    break
+                # print("pause")
+                # conn.sendall(bytes("continue","utf8"))
+                #print("pass pause")
+                data_act = conn.recv(1024)
+                encode_act = data_act.decode("utf8")
+                print(encode_act, " oki ne")
+                if (len(encode_act) == 0):
+                    break
+            print(encodedData)
+            # chỉ để test các request chưa code :v
+            conn.sendall(bytes(encodedData+"ed", "utf8"))
         else:
             print(encodedData)
             # chỉ để test các request chưa code :v
