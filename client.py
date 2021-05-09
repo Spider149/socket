@@ -7,8 +7,10 @@ from PIL import ImageTk, Image
 import socket
 import base64
 import os
-import shutil as sm
+import shutil
 import psutil
+import codecs
+import winreg
 
 root = tk.Tk()
 root.title("Client")
@@ -52,6 +54,7 @@ def submitIP():
 
 
 def takeScreenshotRequest():
+
     def takeScreenFirst():  # lúc mở lên là chụp luôn, không cần update
         global client
         client.sendall(bytes("*snap*", "utf8"))
@@ -71,7 +74,7 @@ def takeScreenshotRequest():
         filename = tkdilg.asksaveasfilename(defaultextension=".png", filetypes=(
             ("PNG file", "*.png"), ("All Files", "*.*")))
         if filename != "":
-            sm.move("snapshot.png", filename)
+            shutil.move("snapshot.png", filename)
 
     def resizeImg():  # scale hình cho vừa khung
         img = Image.open('snapshot.png')
@@ -85,6 +88,7 @@ def takeScreenshotRequest():
     global connected
     if connected:
         newWindow = tk.Toplevel(root)
+        newWindow.protocol("WM_DELETE_WINDOW", on_closing1)
         createNewWindow(newWindow, "Screenshot")
         snapBtn = tk.Button(newWindow, text="Chụp",
                             command=takeScreen)
@@ -125,12 +129,11 @@ def processRunningRequest():
                 Show_Error()
             return
             # Dò id để kill
-        IDkill = tk.Text(killWindow, height=1, width=50)
+        IDkill = tk.Text(killWindow, height=1, width=50, font=myFont)
         IDkill.grid(row=0, column=0, pady=10,
                     padx=(20, 20), sticky=tk.W+tk.S +
                     tk.N+tk.E)
         IDkill.insert(tk.END, 'Nhập ID')
-        IDkill.configure(font=myFont)
         killbtn_final = tk.Button(
             killWindow, height=1, width=12, text="Kill", command=kill_final)
         killbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
@@ -156,12 +159,11 @@ def processRunningRequest():
                 Show_Error()
             return
             # Dò id để kill
-        NameStart = tk.Text(startwindow, height=1, width=50)
+        NameStart = tk.Text(startwindow, height=1, width=50, font=myFont)
         NameStart.grid(row=0, column=0, pady=10,
                        padx=(20, 20), sticky=tk.W+tk.S +
                        tk.N+tk.E)
         NameStart.insert(tk.END, 'Nhập tên')
-        NameStart.configure(font=myFont)
         Startbtn_final = tk.Button(
             startwindow, height=1, width=12, text="Start", command=Start_btn)
         Startbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
@@ -242,12 +244,11 @@ def appRunningRequest():
                 Show_Error()
             return
             # Dò id để kill
-        IDkill = tk.Text(killWindow, height=1, width=50)
+        IDkill = tk.Text(killWindow, height=1, width=50, font=myFont)
         IDkill.grid(row=0, column=0, pady=10,
                     padx=(20, 20), sticky=tk.W+tk.S +
                     tk.N+tk.E)
         IDkill.insert(tk.END, 'Nhập ID')
-        IDkill.configure(font=myFont)
         killbtn_final = tk.Button(
             killWindow, height=1, width=12, text="Kill", command=kill_final)
         killbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
@@ -273,12 +274,11 @@ def appRunningRequest():
                 Show_Error()
             return
             # Dò id để kill
-        NameStart = tk.Text(startwindow, height=1, width=50)
+        NameStart = tk.Text(startwindow, height=1, width=50, font=myFont)
         NameStart.grid(row=0, column=0, pady=10,
                        padx=(20, 20), sticky=tk.W+tk.S +
                        tk.N+tk.E)
         NameStart.insert(tk.END, 'Nhập tên')
-        NameStart.configure(font=myFont)
         Startbtn_final = tk.Button(
             startwindow, height=1, width=12, text="Start", command=Start_btn)
         Startbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
@@ -370,35 +370,98 @@ def registryRequest():
         filename = tkdilg.askopenfilename(initialdir="/",
                                           title="Select a File",
                                           filetypes=(("Registry Files",
-                                                      "*.reg*"),
-                                                     ("all files",
-                                                      "*.*")))
-        f = open(filename, "rb")
-        filename.replace("reg", "txt")
-        value = f.read().decode("utf8")
-        print(value)
+                                                      "*.reg*"),))
+        f = codecs.open(filename, encoding="utf_16")
         address.delete(0, tk.END)
         address.insert(0, filename)
-        # registryContent.delete(1.0, tk.END)
-        # registryContent.insert(tk.END, value)
+        value = f.read()
+        f.close()
+        registryContent.delete(1.0, tk.END)
+        registryContent.insert(tk.END, value)
+
+    def deleteShowResultContent():
+        showResult.configure(state="normal")
+        showResult.delete(1.0, tk.END)
+        showResult.configure(state="disabled")
+
+    def showResultContent(data):
+        showResult.configure(state="normal")
+        showResult.insert(tk.END, data)
+        showResult.configure(state="disabled")
+
+    def sendRegistryRequest():
+        global client
+        currentSelect = dropdown.current()
+        if currentSelect == 1:
+            client.sendall(bytes("1"+pathContent.get("1.0", tk.END)[:-1] +
+                           "***"+nameValueContent.get("1.0", tk.END)[:-1], "utf8"))
+            rawData = client.recv(1024)
+            data = None
+            try:
+                data = rawData.decode("utf8")+"\n"
+            except:
+                data = ""
+                for byte in rawData:
+                    data = data+str(byte)+" "
+                data += "\n"
+            showResultContent(data)
+        elif currentSelect == 2:
+            client.sendall(bytes("2"+pathContent.get("1.0", tk.END)
+                           [:-1]+"**"+nameValueContent.get("1.0", tk.END)[:-1]+"***"+valueContent.get("1.0", tk.END)[:-1]+"****"+typeContent.get(), "utf8"))
+            data = client.recv(1024).decode("utf8")
+            showResultContent(data)
+
+    def updateUI(self):
+        currentValue = dropdown.current()
+        if currentValue == 1:  # get value
+            nameValueContent.grid(row=5, column=0, pady=(0, 10),
+                                  padx=(20, 20), sticky=tk.W+tk.S +
+                                  tk.N+tk.E, columnspan=2)
+            valueContent.grid_remove()
+            typeContent.grid_remove()
+            pass
+        elif currentValue == 2:  # set value
+            nameValueContent.grid(row=5, column=0, pady=(0, 10),
+                                  padx=(20, 20), sticky=tk.W+tk.S +
+                                  tk.N+tk.E, columnspan=2)
+            valueContent.grid(row=6, column=0, pady=(0, 10),
+                              padx=(20, 20), sticky=tk.W+tk.S +
+                              tk.N+tk.E, columnspan=2)
+            typeContent.grid(row=7, column=0, sticky=tk.W+tk.S +
+                             tk.N+tk.E, padx=(20), columnspan=2)
+            pass
+        elif currentValue == 3:  # delete value
+            nameValueContent.grid(row=5, column=0, pady=(0, 10),
+                                  padx=(20, 20), sticky=tk.W+tk.S +
+                                  tk.N+tk.E, columnspan=2)
+            valueContent.grid_remove()
+            typeContent.grid_remove()
+            pass
+        elif currentValue == 4 or currentValue == 5:  # create key and #delete key
+            nameValueContent.grid_remove()
+            valueContent.grid_remove()
+            typeContent.grid_remove()
+            pass
+        else:
+            pass
+        print(currentValue)
     # global connected
     # if connected:
     print("registry")
     newWindow = tk.Toplevel(root)
     createNewWindow(newWindow, "Registry")
-    address = tk.Entry(newWindow)
+    newWindow.minsize(485, 460)
+    address = tk.Entry(newWindow, font=myFont)
 
     address.grid(row=0, column=0, pady=10, sticky=tk.W +
                  tk.S+tk.N+tk.E, padx=(20, 10))
     browseBtn = tk.Button(newWindow, text="Browse...", command=browseAddress)
     browseBtn.grid(row=0, column=1, sticky=tk.W+tk.S +
                    tk.N+tk.E, pady=10, padx=(0, 20))
-    address.configure(font=myFont)
-    registryContent = tk.Text(newWindow, height=6, width=50)
+    registryContent = tk.Text(newWindow, height=6, width=50, font=myFont)
     registryContent.grid(row=1, column=0, pady=0,
                          padx=(20, 10), sticky=tk.W+tk.S +
                          tk.N+tk.E)
-    registryContent.configure(font=myFont)
     registrySubmitBtn = tk.Button(
         newWindow, text="Gửi nội dung", command=submitAddress)
     registrySubmitBtn.grid(row=1, column=1, sticky=tk.W+tk.S +
@@ -408,29 +471,27 @@ def registryRequest():
 
     dropdown = ttk.Combobox(newWindow, width=27,
                             textvariable=tk.StringVar())
-    dropdown['values'] = ("Chọn chức năng", "Set value",
+    dropdown['values'] = ("Chọn chức năng", "Get value", "Set value",
                           "Delete value", "Create key", "Delete key")
     dropdown.current(0)
     dropdown.grid(row=3, column=0, sticky=tk.W+tk.S +
                   tk.N+tk.E, padx=(20, 20), columnspan=2)
-    pathContent = tk.Text(newWindow, height=1, width=35)
+    dropdown.bind("<<ComboboxSelected>>", updateUI)
+    pathContent = tk.Text(newWindow, height=1, width=35, font=myFont)
     pathContent.grid(row=4, column=0, pady=10,
                      padx=(20, 20), sticky=tk.W+tk.S +
                      tk.N+tk.E, columnspan=2)
-    pathContent.insert(tk.END, 'Đường dẫn')
-    pathContent.configure(font=myFont)
-    nameValueContent = tk.Text(newWindow, height=1, width=35)
+    pathContent.insert(tk.END, 'HKEY_CURRENT_CONFIG\\test\\test-a-2\\test-c-1')
+    nameValueContent = tk.Text(newWindow, height=1, width=35, font=myFont)
     nameValueContent.grid(row=5, column=0, pady=(0, 10),
                           padx=(20, 20), sticky=tk.W+tk.S +
                           tk.N+tk.E, columnspan=2)
     nameValueContent.insert(tk.END, 'Name value')
-    nameValueContent.configure(font=myFont)
-    valueContent = tk.Text(newWindow, height=1, width=35)
+    valueContent = tk.Text(newWindow, height=1, width=35, font=myFont)
     valueContent.grid(row=6, column=0, pady=(0, 10),
                       padx=(20, 20), sticky=tk.W+tk.S +
                       tk.N+tk.E, columnspan=2)
     valueContent.insert(tk.END, 'Value')
-    valueContent.configure(font=myFont)
     typeContent = ttk.Combobox(newWindow, width=15,
                                textvariable=tk.StringVar())
     typeContent['values'] = ("Kiểu dữ liệu", "String",
@@ -438,10 +499,16 @@ def registryRequest():
     typeContent.current(0)
     typeContent.grid(row=7, column=0, sticky=tk.W+tk.S +
                      tk.N+tk.E, padx=(20), columnspan=2)
-    sendBtn = tk.Button(newWindow, text="Gửi", command=submitAddress)
-    sendBtn.grid(row=8, column=0, pady=10, padx=(20, 10), sticky=tk.W+tk.E)
-    deleteBtn = tk.Button(newWindow, text="Xóa", command=submitAddress)
-    deleteBtn.grid(row=8, column=1, pady=10, padx=(0, 20), sticky=tk.W+tk.E)
+    showResult = tk.Text(newWindow, height=6, width=1,
+                         font=myFont, state="disabled")
+    showResult.grid(row=8, column=0, pady=(10, 0),
+                    padx=(20, 20), sticky=tk.W+tk.S +
+                    tk.N+tk.E, columnspan=2)
+    sendBtn = tk.Button(newWindow, text="Gửi", command=sendRegistryRequest)
+    sendBtn.grid(row=9, column=0, pady=10, padx=(20, 10), sticky=tk.W+tk.E)
+    deleteBtn = tk.Button(newWindow, text="Xóa",
+                          command=deleteShowResultContent)
+    deleteBtn.grid(row=9, column=1, pady=10, padx=(0, 20), sticky=tk.W+tk.E)
     # else:
     #     showConnectionError()
 
