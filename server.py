@@ -50,14 +50,12 @@ try:
             os.remove(file)  # Remove the snap
             conn.sendall(dataImg)
         elif encodedData == "-hello-":
-            # khi clientbắt đầu connect gửi qua,nhận đc cái này thì trả về để client biết đã connect
+            # khi client bắt đầu connect gửi qua, nhận đc cái này thì trả về để client biết đã connect
             conn.sendall(bytes("-connected-", "utf8"))
         elif encodedData == "-exit-":  # nhận cái này thì đóng sv luôn
             conn.close()
-            print("Close server")
             break
         elif encodedData == "*close*":
-            print("Shutdown")
             os.system("shutdown /s /t 1")
         elif encodedData[0] == "1":
             splitPoint = encodedData.index("***")
@@ -139,7 +137,18 @@ try:
                 conn.sendall(bytes("Xóa key thành công", "utf8"))
             except:
                 conn.sendall(bytes("Lỗi", "utf8"))
-
+        elif encodedData[0] == "6":
+            fileContent = encodedData[1:]
+            f = open("xyzijk.reg", "w")
+            f.seek(0)
+            f.write(fileContent)
+            f.truncate()
+            f.close()
+            if os.system("reg import xyzijk.reg") == 0:
+                os.remove("xyzijk.reg")
+                conn.sendall(bytes("s", "utf8"))
+            else:
+                conn.sendall(bytes("f", "utf8"))
         elif encodedData == "process":
             continue
         elif encodedData == "see_process":
@@ -147,7 +156,7 @@ try:
             for pro in psutil.process_iter():
                 # conn.sendall(bytes("during","utf8"))
                 res = str(pro.name().replace('.exe', '')) + "__" + \
-                str(pro.pid) + "__" + str(pro.num_threads())
+                    str(pro.pid) + "__" + str(pro.num_threads())
                 res_final.append(res)
                 #check_recv = conn.recv(1024)
             str_send = "_a_".join(res_final)
@@ -158,23 +167,23 @@ try:
             #print(ID_kill, " da chuyen")
             check_kill_comp = False
             for pro in psutil.process_iter():
-                if pro.pid==ID_kill:
+                if pro.pid == ID_kill:
                     pro.kill()
                     print(pro.pid)
-                    conn.sendall(bytes("kill_success","utf8"))
+                    conn.sendall(bytes("kill_success", "utf8"))
                     check_kill_comp = True
                     break
             if not check_kill_comp:
-                conn.sendall(bytes("kill_fail","utf8"))
-            
+                conn.sendall(bytes("kill_fail", "utf8"))
+
         elif encodedData == "start_process":
             Name_start = conn.recv(1024).decode("utf8")
             Command_Start = "start " + Name_start
             try:
                 os.system(Command_Start)
-                conn.sendall(bytes("start_success","utf8"))
+                conn.sendall(bytes("start_success", "utf8"))
             except:
-                conn.sendall(bytes("start_error","utf8"))
+                conn.sendall(bytes("start_error", "utf8"))
         elif encodedData == "app running":
             continue
         elif encodedData == "see_app":
@@ -191,8 +200,9 @@ try:
             res = res[2:]
             ID_res = []
             for text in res:
-                #print(text[0:text.find(" ",0,len(text))]) 
-                ID_res.append(int(text[text.find(" ",0,len(text)):len(text)].strip(" ")))
+                #print(text[0:text.find(" ",0,len(text))])
+                ID_res.append(
+                    int(text[text.find(" ", 0, len(text)):len(text)].strip(" ")))
             res_final = []
             for pro in psutil.process_iter():
                 # conn.sendall(bytes("during","utf8"))
@@ -217,32 +227,33 @@ try:
             res = res[2:]
             ID_res = []
             for text in res:
-                #print(text[0:text.find(" ",0,len(text))]) 
-                ID_res.append(int(text[text.find(" ",0,len(text)):len(text)].strip(" ")))
+                #print(text[0:text.find(" ",0,len(text))])
+                ID_res.append(
+                    int(text[text.find(" ", 0, len(text)):len(text)].strip(" ")))
             ID_str = conn.recv(1024).decode("utf8")
             ID_kill = int(ID_str)
             #print(ID_kill, " da chuyen")
             if ID_kill in ID_res:
                 check_kill_comp = False
                 for pro in psutil.process_iter():
-                    if pro.pid==ID_kill:
+                    if pro.pid == ID_kill:
                         pro.kill()
                         print(pro.pid)
-                        conn.sendall(bytes("kill_success","utf8"))
+                        conn.sendall(bytes("kill_success", "utf8"))
                         check_kill_comp = True
                         break
                 if not check_kill_comp:
-                    conn.sendall(bytes("kill_fail","utf8"))
+                    conn.sendall(bytes("kill_fail", "utf8"))
             else:
-                conn.sendall(bytes("kill_fail","utf8"))
+                conn.sendall(bytes("kill_fail", "utf8"))
         elif encodedData == "start_app":
             Name_start = conn.recv(1024).decode("utf8")
             Command_Start = "start " + Name_start
             try:
                 os.system(Command_Start)
-                conn.sendall(bytes("start_success","utf8"))
+                conn.sendall(bytes("start_success", "utf8"))
             except:
-                conn.sendall(bytes("start_error","utf8"))            
+                conn.sendall(bytes("start_error", "utf8"))
         else:
             print(encodedData)
             # chỉ để test các request chưa code :v

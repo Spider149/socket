@@ -9,7 +9,6 @@ import base64
 import os
 import shutil
 import psutil
-import codecs
 import winreg
 
 root = tk.Tk()
@@ -45,7 +44,6 @@ def submitIP():
         client.sendall(bytes("-hello-", "utf8"))
         data = client.recv(1024).decode("utf8")
         if data == "-connected-":
-            print("connected")
             tkmes.showinfo(title="Success",
                            message="Kết nối thành công")
             global connected
@@ -111,12 +109,15 @@ def takeScreenshotRequest():
 def Show_Error():
     tkmes.showerror(
         title="Error", message="Lỗi")
-    
+
+
 def Show_Kill_Process_Comp():
-    tkmes.showinfo(title="Kill Complete", message = "Đã diệt process")
+    tkmes.showinfo(title="Kill Complete", message="Đã diệt process")
+
 
 def Show_Start_Process_Comp():
-    tkmes.showinfo(title="Kill Complete", message = "Process đã được bật")
+    tkmes.showinfo(title="Kill Complete", message="Process đã được bật")
+
 
 def processRunningRequest():
     global connected
@@ -135,10 +136,10 @@ def processRunningRequest():
         def kill_final():
             ID = IDkill.get("1.0", tk.END)[:-1]
             if (ID.isnumeric()):
-                client.sendall(bytes("kill_process","utf8"))
-                client.sendall(bytes(ID,"utf8"))
+                client.sendall(bytes("kill_process", "utf8"))
+                client.sendall(bytes(ID, "utf8"))
                 kill_comp = client.recv(1024).decode("utf8")
-                if (kill_comp=="kill_success"):
+                if (kill_comp == "kill_success"):
                     Show_Kill_Process_Comp()
                 else:
                     Show_Error()
@@ -191,10 +192,10 @@ def processRunningRequest():
 
         def Start_btn():
             ID = NameStart.get("1.0", tk.END)[:-1]
-            client.sendall(bytes("start_process","utf8"))
-            client.sendall(bytes(ID,"utf8"))
+            client.sendall(bytes("start_process", "utf8"))
+            client.sendall(bytes(ID, "utf8"))
             start_comp = client.recv(1024).decode("utf8")
-            if (start_comp=="start_success"):
+            if (start_comp == "start_success"):
                 Show_Start_Process_Comp()
             else:
                 Show_Error()
@@ -219,7 +220,7 @@ def processRunningRequest():
         global client
         client.sendall(bytes("process", "utf8"))
         #data = client.recv(1024).decode("utf8")
-        #print(data)
+        # print(data)
         killBtn = tk.Button(newWindow, height=3, width=10,
                             text="Kill", command=Kill)
         killBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
@@ -259,10 +260,12 @@ def processRunningRequest():
 
 
 def Show_Start_App_Comp():
-    tkmes.showinfo(title="Start Complete", message = "App đã được bật")
-    
+    tkmes.showinfo(title="Start Complete", message="App đã được bật")
+
+
 def Show_Kill_App_Comp():
-    tkmes.showinfo(title="Kill Complete", message = "App đã đươc diệt")
+    tkmes.showinfo(title="Kill Complete", message="App đã đươc diệt")
+
 
 def appRunningRequest():
     global connected
@@ -275,10 +278,10 @@ def appRunningRequest():
         def kill_final():
             ID = IDkill.get("1.0", tk.END)[:-1]
             if (ID.isnumeric()):
-                client.sendall(bytes("kill_app","utf8"))
-                client.sendall(bytes(ID,"utf8"))
+                client.sendall(bytes("kill_app", "utf8"))
+                client.sendall(bytes(ID, "utf8"))
                 kill_comp = client.recv(1024).decode("utf8")
-                if (kill_comp=="kill_success"):
+                if (kill_comp == "kill_success"):
                     Show_Kill_App_Comp()
                 else:
                     Show_Error()
@@ -323,7 +326,7 @@ def appRunningRequest():
         for item in child:
             tree.delete(item)
         check_see = False
-        
+
     def Start():
         startwindow = tk.Toplevel(newWindow)
         createNewWindow(startwindow, "Start")
@@ -331,10 +334,10 @@ def appRunningRequest():
 
         def Start_btn():
             ID = NameStart.get("1.0", tk.END)[:-1]
-            client.sendall(bytes("start_app","utf8"))
-            client.sendall(bytes(ID,"utf8"))
+            client.sendall(bytes("start_app", "utf8"))
+            client.sendall(bytes(ID, "utf8"))
             start_comp = client.recv(1024).decode("utf8")
-            if (start_comp=="start_success"):
+            if (start_comp == "start_success"):
                 Show_Start_App_Comp()
             else:
                 Show_Error()
@@ -358,7 +361,7 @@ def appRunningRequest():
         global client
         client.sendall(bytes("app running", "utf8"))
         #data = client.recv(1024).decode("utf8")
-        #print(data)
+        # print(data)
         killBtn = tk.Button(newWindow, height=3, width=10,
                             text="Kill", command=Kill)
         killBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
@@ -399,7 +402,6 @@ def appRunningRequest():
 def closeRequest():
     global connected
     if connected:
-        print("close")
         global client
         client.sendall(bytes("*close*", "utf8"))
     else:
@@ -418,14 +420,23 @@ def keystrokeRequest():
 
 def registryRequest():
     def submitAddress():
-        print("a")
+        value = registryContent.get("1.0", tk.END)
+        global client
+        client.sendall(bytes("6"+value, "utf8"))
+        data = client.recv(1024).decode("utf8")
+        if data == "s":
+            tkmes.showinfo(title="Thành công",
+                           message="Import registry thành công!")
+        else:
+            tkmes.showerror(title="Thất bại",
+                            message="Import registry thất bại!")
 
     def browseAddress():
         filename = tkdilg.askopenfilename(initialdir="/",
                                           title="Select a File",
                                           filetypes=(("Registry Files",
                                                       "*.reg*"),))
-        f = codecs.open(filename, encoding="utf_16")
+        f = open(filename, encoding="utf_16")
         address.delete(0, tk.END)
         address.insert(0, filename)
         value = f.read()
@@ -461,6 +472,8 @@ def registryRequest():
         elif currentSelect == 4:
             client.sendall(
                 bytes("5"+pathContent.get("1.0", tk.END)[:-1], "utf8"))
+        else:
+            return
         data = client.recv(1024).decode("utf8")+"\n"
         showResultContent(data)
 
@@ -496,7 +509,7 @@ def registryRequest():
     if connected:
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "Registry")
-        newWindow.minsize(485, 460)
+        newWindow.minsize(485, 300)
         address = tk.Entry(newWindow, font=myFont)
 
         address.grid(row=0, column=0, pady=10, sticky=tk.W +
