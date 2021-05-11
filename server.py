@@ -178,11 +178,12 @@ try:
 
         elif encodedData == "start_process":
             Name_start = conn.recv(1024).decode("utf8")
+            print(Name_start, " a ", len(Name_start))
             Command_Start = "start " + Name_start
-            try:
-                os.system(Command_Start)
+            success_or_not = os.system(Command_Start)#subprocess.call(Command_Start)
+            if (success_or_not==0):
                 conn.sendall(bytes("start_success", "utf8"))
-            except:
+            else:
                 conn.sendall(bytes("start_error", "utf8"))
         elif encodedData == "app running":
             continue
@@ -248,12 +249,19 @@ try:
                 conn.sendall(bytes("kill_fail", "utf8"))
         elif encodedData == "start_app":
             Name_start = conn.recv(1024).decode("utf8")
+            print(Name_start, " a ", len(Name_start))
             Command_Start = "start " + Name_start
-            try:
-                os.system(Command_Start)
+            success_or_not = os.system(Command_Start)#subprocess.call(Command_Start)
+            if (success_or_not==0):
                 conn.sendall(bytes("start_success", "utf8"))
-            except:
+            else:
                 conn.sendall(bytes("start_error", "utf8"))
+        elif encodedData == "hook":
+            continue
+        elif encodedData == "unhook":
+            continue
+        elif encodedData == "printkey":
+            continue
         else:
             print(encodedData)
             # chỉ để test các request chưa code :v
