@@ -149,8 +149,7 @@ try:
                 conn.sendall(bytes("s", "utf8"))
             else:
                 conn.sendall(bytes("f", "utf8"))
-        elif encodedData == "process":
-            continue
+
         elif encodedData == "see_process":
             res_final = []
             for pro in psutil.process_iter():
@@ -176,17 +175,14 @@ try:
             if not check_kill_comp:
                 conn.sendall(bytes("kill_fail", "utf8"))
 
-        elif encodedData == "start_process":
+        elif encodedData == "start_process" or encodedData == "start_app":
             Name_start = conn.recv(1024).decode("utf8")
-            print(Name_start, " a ", len(Name_start))
-            Command_Start = "start " + Name_start
-            success_or_not = os.system(Command_Start)#subprocess.call(Command_Start)
-            if (success_or_not==0):
-                conn.sendall(bytes("start_success", "utf8"))
-            else:
-                conn.sendall(bytes("start_error", "utf8"))
-        elif encodedData == "app running":
-            continue
+            try:
+                subprocess.Popen(Name_start)
+                conn.sendall(bytes("success", "utf8"))
+            except:
+                conn.sendall(bytes("error", "utf8"))
+
         elif encodedData == "see_app":
             cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
             proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -247,25 +243,14 @@ try:
                     conn.sendall(bytes("kill_fail", "utf8"))
             else:
                 conn.sendall(bytes("kill_fail", "utf8"))
-        elif encodedData == "start_app":
-            Name_start = conn.recv(1024).decode("utf8")
-            print(Name_start, " a ", len(Name_start))
-            Command_Start = "start " + Name_start
-            success_or_not = os.system(Command_Start)#subprocess.call(Command_Start)
-            if (success_or_not==0):
-                conn.sendall(bytes("start_success", "utf8"))
-            else:
-                conn.sendall(bytes("start_error", "utf8"))
+
         elif encodedData == "hook":
             continue
         elif encodedData == "unhook":
             continue
         elif encodedData == "printkey":
             continue
-        else:
-            print(encodedData)
-            # chỉ để test các request chưa code :v
-            conn.sendall(bytes(encodedData+"ed", "utf8"))
+
 except KeyboardInterrupt:
     conn.close()
 finally:

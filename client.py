@@ -14,7 +14,7 @@ import winreg
 root = tk.Tk()
 root.title("Client")
 
-root.minsize(500, 363)
+root.minsize(340, 250)
 connected = False
 check_see = False
 myFont = font.Font(family="VnArial", size=9)
@@ -122,12 +122,6 @@ def Show_Start_Process_Comp():
 def processRunningRequest():
     global connected
 
-    def Send_Exit():
-        print("Khong phai loi cua t")
-        if connected:
-            newWindow.destroy()
-            client.sendall(bytes("-exit-", "utf8"))
-
     def Kill():
         killWindow = tk.Toplevel(newWindow)
         createNewWindow(killWindow, "Kill")
@@ -195,7 +189,7 @@ def processRunningRequest():
             client.sendall(bytes("start_process", "utf8"))
             client.sendall(bytes(ID, "utf8"))
             start_comp = client.recv(1024).decode("utf8")
-            if (start_comp == "start_success"):
+            if (start_comp == "success"):
                 Show_Start_Process_Comp()
             else:
                 Show_Error()
@@ -213,12 +207,10 @@ def processRunningRequest():
     if connected:
         global check_see
         check_see = False
-        print("process running")
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "Process Running")
         newWindow.minsize(340, 360)
         global client
-        client.sendall(bytes("process", "utf8"))
         #data = client.recv(1024).decode("utf8")
         # print(data)
         killBtn = tk.Button(newWindow, height=3, width=10,
@@ -236,19 +228,20 @@ def processRunningRequest():
         StartBtn = tk.Button(newWindow, height=3, width=10,
                              text="Start", command=Start)
         StartBtn.grid(row=0, column=3, sticky=tk.W+tk.N +
-                      tk.S+tk.E, pady=20, padx=(0, 20))
+                      tk.S+tk.E, pady=20, padx=(0))
         tree = ttk.Treeview(newWindow, selectmode='browse')
         tree.grid(row=1, column=0, columnspan=4, sticky=tk.W+tk.N +
-                  tk.S+tk.E, padx=20)
+                  tk.S+tk.E, padx=(20, 0))
 
         vsb = ttk.Scrollbar(newWindow, orient="vertical", command=tree.yview)
-        vsb.place(x=445, y=116, height=200+27)
+        vsb.grid(row=1, column=4, sticky=tk.W+tk.N +
+                 tk.S, padx=(0, 20))
         tree.configure(yscrollcommand=vsb.set)
         tree["columns"] = ("1", "2", "3")
         tree['show'] = 'headings'
-        tree.column("1", width=120, anchor='c')
+        tree.column("1", width=200, anchor='c')
         tree.column("2", width=120, anchor='c')
-        tree.column("3", width=200, anchor='c')
+        tree.column("3", width=120, anchor='c')
         tree.heading("1", text="Name Application")
         tree.heading("2", text="ID Application")
         tree.heading("3", text="Count Thread")
@@ -337,7 +330,7 @@ def appRunningRequest():
             client.sendall(bytes("start_app", "utf8"))
             client.sendall(bytes(ID, "utf8"))
             start_comp = client.recv(1024).decode("utf8")
-            if (start_comp == "start_success"):
+            if (start_comp == "success"):
                 Show_Start_App_Comp()
             else:
                 Show_Error()
@@ -354,12 +347,10 @@ def appRunningRequest():
     if connected:
         global check_see
         check_see = False
-        print("app running")
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "App Running")
         newWindow.minsize(340, 360)
         global client
-        client.sendall(bytes("app running", "utf8"))
         #data = client.recv(1024).decode("utf8")
         # print(data)
         killBtn = tk.Button(newWindow, height=3, width=10,
@@ -377,20 +368,21 @@ def appRunningRequest():
         StartBtn = tk.Button(newWindow, height=3, width=10,
                              text="Start", command=Start)
         StartBtn.grid(row=0, column=3, sticky=tk.W+tk.N +
-                      tk.S+tk.E, pady=20, padx=(0, 20))
+                      tk.S+tk.E, pady=20, padx=(0))
 
         tree = ttk.Treeview(newWindow, selectmode='browse')
         tree.grid(row=1, column=0, columnspan=4, sticky=tk.W+tk.N +
-                  tk.S+tk.E, padx=20)
+                  tk.S+tk.E, padx=(20, 0))
 
         vsb = ttk.Scrollbar(newWindow, orient="vertical", command=tree.yview)
-        vsb.place(x=445, y=116, height=200+27)
+        vsb.grid(row=1, column=4, sticky=tk.W+tk.N +
+                 tk.S, padx=(0, 20))
         tree.configure(yscrollcommand=vsb.set)
         tree["columns"] = ("1", "2", "3")
         tree['show'] = 'headings'
-        tree.column("1", width=120, anchor='c')
+        tree.column("1", width=200, anchor='c')
         tree.column("2", width=120, anchor='c')
-        tree.column("3", width=200, anchor='c')
+        tree.column("3", width=120, anchor='c')
         tree.heading("1", text="Name Application")
         tree.heading("2", text="ID Application")
         tree.heading("3", text="Count Thread")
@@ -410,19 +402,19 @@ def closeRequest():
 
 def keystrokeRequest():
     global connected
-    
+
     def Hook():
         client.sendall(bytes("hook", "utf8"))
-        
-    def UnHook():    
+
+    def UnHook():
         client.sendall(bytes("unhook", "utf8"))
-    
+
     def PrintKeyBoard():
         client.sendall(bytes("printkey", "utf8"))
-    
+
     def Del():
         return
-    
+
     if connected:
         print("keylog")
         newWindow = tk.Toplevel(root)
@@ -437,33 +429,17 @@ def keystrokeRequest():
         HookBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
                      tk.S+tk.E, pady=20, padx=20)
         UnHookBtn = tk.Button(newWindow, height=3, width=10,
-                           text="Unhook", command=UnHook)
+                              text="Unhook", command=UnHook)
         UnHookBtn.grid(row=0, column=1, sticky=tk.W+tk.N +
-                    tk.S+tk.E, pady=20, padx=(0, 20))
+                       tk.S+tk.E, pady=20, padx=(0, 20))
         PrintBtn = tk.Button(newWindow, height=3, width=10,
-                           text="In phím", command=PrintKeyBoard)
+                             text="In phím", command=PrintKeyBoard)
         PrintBtn.grid(row=0, column=2, sticky=tk.W+tk.N +
-                    tk.S+tk.E, pady=20, padx=(0, 20))
-        DelBtn = tk.Button(newWindow, height=3, width=10,
-                             text="Xóa", command=Del)
-        DelBtn.grid(row=0, column=3, sticky=tk.W+tk.N +
                       tk.S+tk.E, pady=20, padx=(0, 20))
-
-        tree = ttk.Treeview(newWindow, selectmode='browse')
-        tree.grid(row=1, column=0, columnspan=4, sticky=tk.W+tk.N +
-                  tk.S+tk.E, padx=20)
-
-        vsb = ttk.Scrollbar(newWindow, orient="vertical", command=tree.yview)
-        vsb.place(x=445, y=116, height=200+27)
-        tree.configure(yscrollcommand=vsb.set)
-        tree["columns"] = ("1", "2", "3")
-        tree['show'] = 'headings'
-        tree.column("1", width=120, anchor='c')
-        tree.column("2", width=120, anchor='c')
-        tree.column("3", width=200, anchor='c')
-        tree.heading("1", text="Name Application")
-        tree.heading("2", text="ID Application")
-        tree.heading("3", text="Count Thread")
+        DelBtn = tk.Button(newWindow, height=3, width=10,
+                           text="Xóa", command=Del)
+        DelBtn.grid(row=0, column=3, sticky=tk.W+tk.N +
+                    tk.S+tk.E, pady=20, padx=(0, 20))
         newWindow.mainloop()
     else:
         showConnectionError()
@@ -593,7 +569,7 @@ def registryRequest():
                          padx=(20, 20), sticky=tk.W+tk.S +
                          tk.N+tk.E, columnspan=2)
         pathContent.insert(
-            tk.END, 'HKEY_CURRENT_CONFIG\\test\\test-a-2\\test-c-1')
+            tk.END, "Đường dẫn")
         nameValueContent = tk.Text(newWindow, height=1, width=35, font=myFont)
         nameValueContent.grid(row=5, column=0, pady=(0, 10),
                               padx=(20, 20), sticky=tk.W+tk.S +
@@ -641,60 +617,51 @@ labelIP = tk.Label(root, text="Nhập IP:")
 labelIP.grid(row=0, column=0, pady=20, sticky=tk.W +
              tk.S+tk.N+tk.E, padx=(20, 10))
 
-entryIP = tk.Entry(root,width=40)
+entryIP = tk.Entry(root)
 entryIP.grid(row=0, column=1, pady=20, sticky=tk.W +
              tk.S+tk.N+tk.E, padx=(0, 10))
 
 entryIP.insert(tk.END, '127.0.0.1')
 
-ipBtn = tk.Button(root, text="Kết nối", height = 1,width=11,command=submitIP)
+ipBtn = tk.Button(root, text="Nhập", command=submitIP)
 ipBtn.grid(row=0, column=2, sticky=tk.W+tk.S +
            tk.N+tk.E, pady=20, padx=(0, 10))
 
-processBtn = tk.Button(root, height=12,width=13,text="Process\nrunning",
+processBtn = tk.Button(root, text="Process running",
                        command=processRunningRequest)
-processBtn.place(x = 17,y = 75)
+processBtn.grid(row=1, column=2, sticky=tk.W+tk.N +
+                tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
-#processBtn.grid(row=1, column=2, sticky=tk.W+tk.N +
- #               tk.S+tk.E, pady=(0, 20), padx=(0, 10))
-
-screenshotBtn = tk.Button(root, height = 3, width = 16, text="Chụp màn hình",
+screenshotBtn = tk.Button(root, text="Chụp màn hình",
                           command=takeScreenshotRequest)
-#screenshotBtn.grid(row=1, column=1, sticky=tk.W+tk.N +
- #                  tk.S+tk.E, pady=(0, 20), padx=(0, 10))
-screenshotBtn.place(x=240, y = 75 + 83)
+screenshotBtn.grid(row=1, column=1, sticky=tk.W+tk.N +
+                   tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
-appRunningBtn = tk.Button(root, height=3,width=28,text="App Running",
+appRunningBtn = tk.Button(root, text="App Running",
                           command=appRunningRequest)
-appRunningBtn.place(x = 17 + 130, y = 75)
+appRunningBtn.grid(row=2, column=1, sticky=tk.W+tk.N +
+                   tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
-#appRunningBtn.grid(row=2, column=1, sticky=tk.W+tk.N +
-                 #  tk.S+tk.E, pady=(0, 20), padx=(0, 10))
-
-keystrokeBtn = tk.Button(root, height = 7, width = 16, text="Keystroke",
+keystrokeBtn = tk.Button(root, text="Keystroke",
                          command=keystrokeRequest)
-keystrokeBtn.place(x = 137 + 250, y = 75)
+keystrokeBtn.grid(row=2, column=2, sticky=tk.W+tk.N +
+                  tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
-#keystrokeBtn.grid(row=2, column=2, sticky=tk.W+tk.N +
- #                 tk.S+tk.E, pady=(0, 20), padx=(0, 10))
-
-registryBtn = tk.Button(root, height=4,width=35,text="Sửa registry",
+registryBtn = tk.Button(root, text="Sửa registry",
                         command=registryRequest)
-registryBtn.place(x=17 + 130, y = 75 + 83 + 80)
+registryBtn.grid(row=3, column=1, sticky=tk.W+tk.N +
+                 tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
-#registryBtn.grid(row=3, column=1, sticky=tk.W+tk.N +
- #                tk.S+tk.E, pady=(0, 20), padx=(0, 10))
-
-closeServerBtn = tk.Button(root, height = 3, width = 9,text="Tắt máy",
+closeServerBtn = tk.Button(root, text="Tắt máy",
                            command=closeRequest)
-closeServerBtn.place(x = 17 + 130, y =75 + 83)
-#closeServerBtn.grid(row=3, column=2, sticky=tk.W+tk.N +
- #                   tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+closeServerBtn.grid(row=3, column=2, sticky=tk.W+tk.N +
+                    tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
-exitBtn = tk.Button(root, height=4,width=8,text="Thoát",
+exitBtn = tk.Button(root, text="Thoát",
                     command=exitRequest)
-exitBtn.place(x=137 + 310, y = 75 + 83 + 80)
-#exitBtn.grid(row=4, column=2, sticky=tk.W+tk.N +tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+exitBtn.grid(row=4, column=2, sticky=tk.W+tk.N +
+             tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+
 
 def on_closing():
     if tkmes.askokcancel("Quit", "Do you want to quit?"):
