@@ -26,6 +26,10 @@ def createNewWindow(newWindow, name):
     newWindow.grab_set()
 
 
+def onClosing2(parent):
+    parent.grab_set()
+
+
 def showConnectionError():
     tkmes.showerror(
         title="Error", message="Chưa kết nối đến server")
@@ -126,6 +130,7 @@ def processRunningRequest():
         killWindow = tk.Toplevel(newWindow)
         createNewWindow(killWindow, "Kill")
         killWindow.minsize(30, 50)
+        killWindow.protocol("WM_DELETE_WINDOW", onClosing2(newWindow))
 
         def kill_final():
             ID = IDkill.get("1.0", tk.END)[:-1]
@@ -183,6 +188,7 @@ def processRunningRequest():
         startwindow = tk.Toplevel(newWindow)
         createNewWindow(startwindow, "Start")
         startwindow.minsize(30, 50)
+        startwindow.protocol("WM_DELETE_WINDOW", onClosing2(newWindow))
 
         def Start_btn():
             ID = NameStart.get("1.0", tk.END)[:-1]
@@ -267,6 +273,7 @@ def appRunningRequest():
         killWindow = tk.Toplevel(newWindow)
         createNewWindow(killWindow, "Kill")
         killWindow.minsize(30, 50)
+        killWindow.protocol("WM_DELETE_WINDOW", onClosing2(newWindow))
 
         def kill_final():
             ID = IDkill.get("1.0", tk.END)[:-1]
@@ -324,6 +331,7 @@ def appRunningRequest():
         startwindow = tk.Toplevel(newWindow)
         createNewWindow(startwindow, "Start")
         startwindow.minsize(30, 50)
+        startwindow.protocol("WM_DELETE_WINDOW", onClosing2(newWindow))
 
         def Start_btn():
             ID = NameStart.get("1.0", tk.END)[:-1]
@@ -663,10 +671,10 @@ exitBtn.grid(row=4, column=2, sticky=tk.W+tk.N +
              tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
 
-def on_closing():
+def onClosing():
     if tkmes.askokcancel("Quit", "Do you want to quit?"):
         exitRequest()
 
 
-root.protocol("WM_DELETE_WINDOW", on_closing)
+root.protocol("WM_DELETE_WINDOW", onClosing)
 root.mainloop()
