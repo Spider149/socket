@@ -174,15 +174,30 @@ try:
                     break
             if not check_kill_comp:
                 conn.sendall(bytes("kill_fail", "utf8"))
-
-        elif encodedData == "start_process" or encodedData == "start_app":
+        elif encodedData == "start_app" or encodedData == "start_process":
             Name_start = conn.recv(1024).decode("utf8")
-            try:
-                subprocess.Popen(Name_start)
+            os.popen("start "+ Name_start)
+            check_start = False
+            cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
+            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+            res = []
+            for line in proc.stdout:
+                if line.rstrip():
+                    name = line.decode().rstrip()
+                    res.append(name)
+            res = res[2:]
+            Name_res = []
+            for text in res:
+                Name_res.append(
+                    text[0:text.find(" ", 0, len(text))].strip(" "))
+            for pro in psutil.process_iter():
+                if(pro.name().replace('.exe','')==Name_start and pro.name().replace('.exe','') in Name_res):
+                    check_start = True
+                    break
+            if (check_start):
                 conn.sendall(bytes("success", "utf8"))
-            except:
+            else:
                 conn.sendall(bytes("error", "utf8"))
-
         elif encodedData == "see_app":
             cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
             proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
