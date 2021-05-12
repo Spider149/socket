@@ -28,6 +28,7 @@ def createNewWindow(newWindow, name):
 
 def onClosing2(parent):
     parent.grab_set()
+    print("ok")
 
 
 def showConnectionError():
@@ -408,19 +409,45 @@ def closeRequest():
         showConnectionError()
 
 
+hooking = False
+unhooked = False
+
+
 def keystrokeRequest():
     global connected
 
     def Hook():
+        global hooking
+        if hooking:
+            return
         client.sendall(bytes("hook", "utf8"))
 
+        hooking = True
+        print("hooked")
+
     def UnHook():
+        global hooking
+        if not hooking:
+            return
         client.sendall(bytes("unhook", "utf8"))
+        print("unhooked")
+        global unhooked
+
+        unhooked = True
+        hooking = False
+        # nếu chưa hooking thì không gửi request, tránh lỗi
 
     def PrintKeyBoard():
-        client.sendall(bytes("printkey", "utf8"))
+        global unhooked
+        global hooking
+        if unhooked and not hooking:
+            client.sendall(bytes("printkey", "utf8"))
+            print("print")
+        # tạo thêm cái ô ở dưới, đọc từ file keylog.txt ra
+        # chỉ cho đọc khi đã unhook
 
     def Del():
+        # tạo thêm cái ô ở dưới r gọi hàm xóa chữ thôi
         return
 
     if connected:

