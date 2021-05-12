@@ -8,8 +8,7 @@ import socket
 import base64
 import os
 import shutil
-import psutil
-import winreg
+
 
 root = tk.Tk()
 root.title("Client")
@@ -416,14 +415,25 @@ unhooked = False
 def keystrokeRequest():
     global connected
 
+    def disableWindow():
+        pass
+
+    def enableWindow():
+        newWindow.destroy()
+        f = open("keylog.txt", "w")
+        f.truncate(0)
+        f.close()
+        # tắt keylog đi thì xóa mẹ hết luôn, mỗi lần print là đọc nguyên file vô, tránh in thừa từ lần trước
+
     def Hook():
         global hooking
         if hooking:
             return
         client.sendall(bytes("hook", "utf8"))
-
         hooking = True
         print("hooked")
+
+        newWindow.protocol("WM_DELETE_WINDOW", disableWindow)
 
     def UnHook():
         global hooking
@@ -435,7 +445,7 @@ def keystrokeRequest():
 
         unhooked = True
         hooking = False
-        # nếu chưa hooking thì không gửi request, tránh lỗi
+        newWindow.protocol("WM_DELETE_WINDOW", enableWindow)
 
     def PrintKeyBoard():
         global unhooked
@@ -443,14 +453,20 @@ def keystrokeRequest():
         if unhooked and not hooking:
             client.sendall(bytes("printkey", "utf8"))
             print("print")
-        # tạo thêm cái ô ở dưới, đọc từ file keylog.txt ra
-        # chỉ cho đọc khi đã unhook
+            # gửi request qua lấy nội dung trong file keylog về mà hiển thị vô cái ô ở dưới
+            # chỉ in được khi vừa unhook xong và không đang hooking
+            # 2 hàm trên đã test chạy ok, không thể lỗi được
+            # btw hàm start app vs process vẫn có vấn đề
 
     def Del():
         # tạo thêm cái ô ở dưới r gọi hàm xóa chữ thôi
         return
 
     if connected:
+        global hooking
+        global unhooked
+        hooking = False
+        unhooked = False
         print("keylog")
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "Keystroke")
