@@ -191,27 +191,10 @@ try:
                 conn.sendall(bytes("kill_fail", "utf8"))
         elif encodedData == "start_app" or encodedData == "start_process":
             Name_start = conn.recv(1024).decode("utf8")
-            os.popen("start " + Name_start)
-            check_start = False
-            cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
-            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-            res = []
-            for line in proc.stdout:
-                if line.rstrip():
-                    name = line.decode().rstrip()
-                    res.append(name)
-            res = res[2:]
-            Name_res = []
-            for text in res:
-                Name_res.append(
-                    text[0:text.find(" ", 0, len(text))].strip(" "))
-            for pro in psutil.process_iter():
-                if(pro.name().replace('.exe', '') == Name_start and pro.name().replace('.exe', '') in Name_res):
-                    check_start = True
-                    break
-            if (check_start):
+            try:
+                os.startfile(Name_start)
                 conn.sendall(bytes("success", "utf8"))
-            else:
+            except:
                 conn.sendall(bytes("error", "utf8"))
         elif encodedData == "see_app":
             cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
@@ -219,25 +202,19 @@ try:
             res = []
             for line in proc.stdout:
                 if line.rstrip():
-                    # only print lines that are not empty
-                    # decode() is necessary to get rid of the binary string (b')
-                    # rstrip() to remove `\r\n`
                     name = line.decode().rstrip()
                     res.append(name)
             res = res[2:]
             ID_res = []
             for text in res:
-                # print(text[0:text.find(" ",0,len(text))])
                 ID_res.append(
                     int(text[text.find(" ", 0, len(text)):len(text)].strip(" ")))
             res_final = []
             for pro in psutil.process_iter():
-                # conn.sendall(bytes("during","utf8"))
                 if pro.pid in ID_res:
                     res = str(pro.name().replace('.exe', '')) + "__" + \
                         str(pro.pid) + "__" + str(pro.num_threads())
                     res_final.append(res)
-                # check_recv = conn.recv(1024)
             str_send = "_a_".join(res_final)
             conn.sendall(bytes(str_send, "utf8"))
         elif encodedData == "kill_app":
