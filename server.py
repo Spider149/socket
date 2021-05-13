@@ -168,17 +168,14 @@ try:
         elif encodedData == "see_process":
             res_final = []
             for pro in psutil.process_iter():
-                # conn.sendall(bytes("during","utf8"))
                 res = str(pro.name().replace('.exe', '')) + "__" + \
                     str(pro.pid) + "__" + str(pro.num_threads())
                 res_final.append(res)
-                # check_recv = conn.recv(1024)
             str_send = "_a_".join(res_final)
             conn.sendall(bytes(str_send, "utf8"))
         elif encodedData == "kill_process":
             ID_str = conn.recv(1024).decode("utf8")
             ID_kill = int(ID_str)
-            # print(ID_kill, " da chuyen")
             check_kill_comp = False
             for pro in psutil.process_iter():
                 if pro.pid == ID_kill:
@@ -227,17 +224,14 @@ try:
             res = res[2:]
             ID_res = []
             for text in res:
-                # print(text[0:text.find(" ",0,len(text))])
                 ID_res.append(
                     int(text[text.find(" ", 0, len(text)):len(text)].strip(" ")))
             res_final = []
             for pro in psutil.process_iter():
-                # conn.sendall(bytes("during","utf8"))
                 if pro.pid in ID_res:
                     res = str(pro.name().replace('.exe', '')) + "__" + \
                         str(pro.pid) + "__" + str(pro.num_threads())
                     res_final.append(res)
-                # check_recv = conn.recv(1024)
             str_send = "_a_".join(res_final)
             conn.sendall(bytes(str_send, "utf8"))
         elif encodedData == "kill_app":
@@ -254,12 +248,10 @@ try:
             res = res[2:]
             ID_res = []
             for text in res:
-                # print(text[0:text.find(" ",0,len(text))])
                 ID_res.append(
                     int(text[text.find(" ", 0, len(text)):len(text)].strip(" ")))
             ID_str = conn.recv(1024).decode("utf8")
             ID_kill = int(ID_str)
-            # print(ID_kill, " da chuyen")
             if ID_kill in ID_res:
                 check_kill_comp = False
                 for pro in psutil.process_iter():
