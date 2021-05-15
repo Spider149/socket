@@ -12,8 +12,8 @@ import shutil
 
 root = tk.Tk()
 root.title("Client")
-
-root.minsize(340, 250)
+root.geometry("550x363")
+root.minsize(550, 363)
 connected = False
 check_see = False
 hooking = False
@@ -661,50 +661,49 @@ labelIP = tk.Label(root, text="Nhập IP:")
 labelIP.grid(row=0, column=0, pady=20, sticky=tk.W +
              tk.S+tk.N+tk.E, padx=(20, 10))
 
-entryIP = tk.Entry(root)
+entryIP = tk.Entry(root,width=40)
 entryIP.grid(row=0, column=1, pady=20, sticky=tk.W +
              tk.S+tk.N+tk.E, padx=(0, 10))
 
 entryIP.insert(tk.END, '127.0.0.1')
 
-ipBtn = tk.Button(root, text="Nhập", command=submitIP)
+ipBtn = tk.Button(root, text="Kết nối", height = 1,width=11,command=submitIP)
 ipBtn.grid(row=0, column=2, sticky=tk.W+tk.S +
            tk.N+tk.E, pady=20, padx=(0, 10))
 
-processBtn = tk.Button(root, text="Process running",
+processBtn = tk.Button(root, height=12,width=13,text="Process\nrunning",
                        command=processRunningRequest)
-processBtn.grid(row=1, column=2, sticky=tk.W+tk.N +
-                tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+processBtn.place(x = 17,y = 75)
 
-screenshotBtn = tk.Button(root, text="Chụp màn hình",
+
+screenshotBtn = tk.Button(root, height = 3, width = 16, text="Chụp màn hình",
                           command=takeScreenshotRequest)
-screenshotBtn.grid(row=1, column=1, sticky=tk.W+tk.N +
-                   tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
-appRunningBtn = tk.Button(root, text="App Running",
+screenshotBtn.place(x=240, y = 75 + 83)
+
+appRunningBtn = tk.Button(root, height=3,width=28,text="App Running",
                           command=appRunningRequest)
-appRunningBtn.grid(row=2, column=1, sticky=tk.W+tk.N +
-                   tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+appRunningBtn.place(x = 17 + 130, y = 75)
 
-keystrokeBtn = tk.Button(root, text="Keystroke",
+
+keystrokeBtn = tk.Button(root, height = 7, width = 16, text="Keystroke",
                          command=keystrokeRequest)
-keystrokeBtn.grid(row=2, column=2, sticky=tk.W+tk.N +
-                  tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+keystrokeBtn.place(x = 137 + 250, y = 75)
 
-registryBtn = tk.Button(root, text="Sửa registry",
+
+registryBtn = tk.Button(root, height=4,width=35,text="Sửa registry",
                         command=registryRequest)
-registryBtn.grid(row=3, column=1, sticky=tk.W+tk.N +
-                 tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+registryBtn.place(x=17 + 130, y = 75 + 83 + 80)
 
-closeServerBtn = tk.Button(root, text="Tắt máy",
+
+closeServerBtn = tk.Button(root, height = 3, width = 9,text="Tắt máy",
                            command=closeRequest)
-closeServerBtn.grid(row=3, column=2, sticky=tk.W+tk.N +
-                    tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+closeServerBtn.place(x = 17 + 130, y =75 + 83)
 
-exitBtn = tk.Button(root, text="Thoát",
+
+exitBtn = tk.Button(root, height=4,width=8,text="Thoát",
                     command=exitRequest)
-exitBtn.grid(row=4, column=2, sticky=tk.W+tk.N +
-             tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+exitBtn.place(x=137 + 310, y = 75 + 83 + 80)
 
 
 def onClosing():

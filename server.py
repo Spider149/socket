@@ -51,7 +51,10 @@ def connect():
     s.bind((HOST, PORT))
     s.listen(1)
     print("Waiting for Client")
-    conn, addr = s.accept()
+    try:
+        conn, addr = s.accept()
+    except:
+        return
     try:
         print("Connected by ", addr)
         while True:
