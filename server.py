@@ -53,8 +53,6 @@ def connect():
     print("Waiting for Client")
     try:
         conn, addr = s.accept()
-        global clientIsConnected
-        clientIsConnected = True
     except:
         return
     try:
