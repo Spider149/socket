@@ -21,14 +21,14 @@ unhooked = False
 myFont = font.Font(family="VnArial", size=9)
 
 
+def onClosing2(parent, current):
+    parent.grab_set()
+    current.destroy()
+
+
 def createNewWindow(newWindow, name):
     newWindow.minsize(340, 250)
     newWindow.title(name)
-    newWindow.grab_set()
-
-
-def onClosing2(parent):
-    parent.grab_set()
 
 
 def showConnectionError():
@@ -106,6 +106,7 @@ def takeScreenshotRequest():
         lb = tk.Label(newWindow, image=resizedImg)
         lb.grid(row=1, column=0, columnspan=2, sticky=tk.W+tk.N +
                 tk.S+tk.E, pady=(20, 20), padx=(20, 20))
+        newWindow.grab_set()
         newWindow.mainloop()
     else:
         showConnectionError()
@@ -131,7 +132,6 @@ def processRunningRequest():
         killWindow = tk.Toplevel(newWindow)
         createNewWindow(killWindow, "Kill")
         killWindow.minsize(30, 50)
-        killWindow.protocol("WM_DELETE_WINDOW", onClosing2(newWindow))
 
         def kill_final():
             ID = IDkill.get("1.0", tk.END)[:-1]
@@ -155,6 +155,9 @@ def processRunningRequest():
             killWindow, height=1, width=12, text="Kill", command=kill_final)
         killbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
                            tk.S+tk.E, pady=10, padx=(20, 20))
+        killWindow.protocol("WM_DELETE_WINDOW",
+                            lambda: onClosing2(newWindow, killWindow))
+        killWindow.grab_set()
         killWindow.mainloop()
 
     def See():
@@ -189,7 +192,6 @@ def processRunningRequest():
         startwindow = tk.Toplevel(newWindow)
         createNewWindow(startwindow, "Start")
         startwindow.minsize(30, 50)
-        startwindow.protocol("WM_DELETE_WINDOW", onClosing2(newWindow))
 
         def Start_btn():
             ID = NameStart.get("1.0", tk.END)[:-1]
@@ -210,6 +212,9 @@ def processRunningRequest():
             startwindow, height=1, width=12, text="Start", command=Start_btn)
         Startbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
                             tk.S+tk.E, pady=10, padx=(20, 20))
+        startwindow.protocol("WM_DELETE_WINDOW",
+                             lambda: onClosing2(newWindow, startwindow))
+        startwindow.grab_set()
         startwindow.mainloop()
     if connected:
         global check_see
@@ -251,6 +256,7 @@ def processRunningRequest():
         tree.heading("1", text="Name Application")
         tree.heading("2", text="ID Application")
         tree.heading("3", text="Count Thread")
+        newWindow.grab_set()
         newWindow.mainloop()
 
     else:
@@ -272,7 +278,6 @@ def appRunningRequest():
         killWindow = tk.Toplevel(newWindow)
         createNewWindow(killWindow, "Kill")
         killWindow.minsize(30, 50)
-        killWindow.protocol("WM_DELETE_WINDOW", onClosing2(newWindow))
 
         def kill_final():
             ID = IDkill.get("1.0", tk.END)[:-1]
@@ -296,6 +301,9 @@ def appRunningRequest():
             killWindow, height=1, width=12, text="Kill", command=kill_final)
         killbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
                            tk.S+tk.E, pady=10, padx=(20, 20))
+        killWindow.protocol("WM_DELETE_WINDOW",
+                            lambda: onClosing2(newWindow, killWindow))
+        killWindow.grab_set()
         killWindow.mainloop()
 
     def See():
@@ -330,7 +338,6 @@ def appRunningRequest():
         startwindow = tk.Toplevel(newWindow)
         createNewWindow(startwindow, "Start")
         startwindow.minsize(30, 50)
-        startwindow.protocol("WM_DELETE_WINDOW", onClosing2(newWindow))
 
         def Start_btn():
             ID = NameStart.get("1.0", tk.END)[:-1]
@@ -350,6 +357,9 @@ def appRunningRequest():
             startwindow, height=1, width=12, text="Start", command=Start_btn)
         Startbtn_final.grid(row=0, column=1, sticky=tk.W+tk.N +
                             tk.S+tk.E, pady=10, padx=(20, 20))
+        startwindow.protocol("WM_DELETE_WINDOW",
+                             lambda: onClosing2(newWindow, startwindow))
+        startwindow.grab_set()
         startwindow.mainloop()
     if connected:
         global check_see
@@ -392,6 +402,7 @@ def appRunningRequest():
         tree.heading("1", text="Name Application")
         tree.heading("2", text="ID Application")
         tree.heading("3", text="Count Thread")
+        newWindow.grab_set()
         newWindow.mainloop()
     else:
         showConnectionError()
@@ -483,6 +494,7 @@ def keystrokeRequest():
         Text_box.grid(row=1, column=0, sticky=tk.W+tk.N +
                       tk.S+tk.E, padx=20, columnspan=4)
         Text_box.configure(state="disabled")
+        newWindow.grab_set()
         newWindow.mainloop()
     else:
         showConnectionError()
@@ -641,6 +653,8 @@ def registryRequest():
                               command=deleteShowResultContent)
         deleteBtn.grid(row=9, column=1, pady=10,
                        padx=(0, 20), sticky=tk.W+tk.E)
+        newWindow.mainloop()
+        newWindow.grab_set()
     else:
         showConnectionError()
 
