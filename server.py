@@ -59,7 +59,10 @@ def connect():
         print("Connected by ", addr)
         while True:
             data = conn.recv(1024)
-            encodedData = data.decode("utf8")
+            try:
+                encodedData = data.decode("utf8")
+            except:
+                encodedData = data.decode("utf_16")
             if encodedData == "*snap*":
                 snapshot = ImageGrab.grab()
                 file = "scr.jpg"
@@ -159,7 +162,7 @@ def connect():
                     conn.sendall(bytes("Lỗi", "utf8"))
             elif encodedData[0] == "6":
                 fileContent = encodedData[1:]
-                f = open("xyzijk.reg", "w")
+                f = open("xyzijk.reg", "w", encoding="utf_16")
                 f.seek(0)
                 f.write(fileContent)
                 f.truncate()

@@ -504,8 +504,8 @@ def registryRequest():
     def submitAddress():
         value = registryContent.get("1.0", tk.END)
         global client
-        client.sendall(bytes("6"+value, "utf8"))
-        data = client.recv(1024).decode("utf8")
+        client.sendall(bytes("6"+value, "utf_16"))
+        data = client.recv(1024).decode("utf_8")
         if data == "s":
             tkmes.showinfo(title="Thành công",
                            message="Import registry thành công!")
@@ -518,6 +518,8 @@ def registryRequest():
                                           title="Select a File",
                                           filetypes=(("Registry Files",
                                                       "*.reg*"),))
+        if(filename == ""):
+            return
         f = open(filename, encoding="utf_16")
         address.delete(0, tk.END)
         address.insert(0, filename)
@@ -653,8 +655,9 @@ def registryRequest():
                               command=deleteShowResultContent)
         deleteBtn.grid(row=9, column=1, pady=10,
                        padx=(0, 20), sticky=tk.W+tk.E)
-        newWindow.mainloop()
         newWindow.grab_set()
+        newWindow.mainloop()
+
     else:
         showConnectionError()
 
