@@ -417,7 +417,6 @@ def keystrokeRequest():
         f = open("keylog.txt", "w")
         f.truncate(0)
         f.close()
-        # tắt keylog đi thì xóa mẹ hết luôn, mỗi lần print là đọc nguyên file vô, tránh in thừa từ lần trước
 
     def Hook():
         global hooking
@@ -650,10 +649,14 @@ def exitRequest():
     global connected
     if connected:
         global client
-        client.sendall(bytes("-exit-", "utf8"))
-        client.close()
         if os.path.exists("snapshot.png"):
             os.remove("snapshot.png")
+        try:
+            client.sendall(bytes("-exit-", "utf8"))
+        except:
+            pass
+        client.close()
+
     root.destroy()
 
 

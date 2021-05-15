@@ -51,7 +51,12 @@ def connect():
     s.bind((HOST, PORT))
     s.listen(1)
     print("Waiting for Client")
-    conn, addr = s.accept()
+    try:
+        conn, addr = s.accept()
+        global clientIsConnected
+        clientIsConnected = True
+    except:
+        return
     try:
         print("Connected by ", addr)
         while True:
@@ -183,7 +188,6 @@ def connect():
                 for pro in psutil.process_iter():
                     if pro.pid == ID_kill:
                         pro.kill()
-                        print(pro.pid)
                         conn.sendall(bytes("kill_success", "utf8"))
                         check_kill_comp = True
                         break
@@ -239,7 +243,6 @@ def connect():
                     for pro in psutil.process_iter():
                         if pro.pid == ID_kill:
                             pro.kill()
-                            print(pro.pid)
                             conn.sendall(bytes("kill_success", "utf8"))
                             check_kill_comp = True
                             break
@@ -274,7 +277,7 @@ def threadConnect():
     if isConnected:
         return
     isConnected = True
-    tConnect = threading.Thread(target=connect)
+    tConnect = threading.Thread(target=connect, daemon=True)
     tConnect.start()
 
 
@@ -288,13 +291,13 @@ def threadUI():
 
 
 def onClosing():
-    global s
-    s.close()
+    if isConnected:
+        s.close()
     root.destroy()
 
 
 root = tk.Tk()
-tUI = threading.Thread(target=threadUI)
+tUI = threading.Thread(target=threadUI, daemon=True)
 tUI.start()
 root.protocol("WM_DELETE_WINDOW", onClosing)
 root.mainloop()
