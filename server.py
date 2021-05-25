@@ -9,7 +9,7 @@ import pynput
 import tkinter as tk
 import threading
 
-HOST = "127.0.0.1"
+HOST = "0.0.0.0"
 PORT = 54321
 isConnected = False
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

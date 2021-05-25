@@ -53,8 +53,8 @@ def submitIP():
                            message="Kết nối thành công")
             global connected
             connected = True
-    except socket.error:
-        tkmes.showerror(title="Error", message="Kết nối thất bại")
+    except socket.error as e:
+        print(e)
 
 
 def takeScreenshotRequest():
@@ -424,10 +424,8 @@ def keystrokeRequest():
         pass
 
     def enableWindow():
+        os.remove("keylog.txt")
         newWindow.destroy()
-        f = open("keylog.txt", "w")
-        f.truncate(0)
-        f.close()
 
     def Hook():
         global hooking
@@ -472,7 +470,6 @@ def keystrokeRequest():
         createNewWindow(newWindow, "Keystroke")
         newWindow.minsize(340, 360)
         global client
-        client.sendall(bytes("app running", "utf8"))
 
         HookBtn = tk.Button(newWindow, height=3, width=10,
                             text="Hook", command=Hook)
@@ -685,7 +682,7 @@ entryIP = tk.Entry(root)
 entryIP.grid(row=0, column=1, pady=20, sticky=tk.W +
              tk.S+tk.N+tk.E, padx=(0, 10))
 
-entryIP.insert(tk.END, '127.0.0.1')
+entryIP.insert(tk.END, '192.168.69.96')
 
 ipBtn = tk.Button(root, text="Nhập", command=submitIP)
 ipBtn.grid(row=0, column=2, sticky=tk.W+tk.S +
