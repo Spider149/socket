@@ -53,8 +53,8 @@ def submitIP():
                            message="Kết nối thành công")
             global connected
             connected = True
-    except socket.error as e:
-        print(e)
+    except socket.error:
+        tkmes.showerror(title="Error", message="Kết nối thất bại")
 
 
 def takeScreenshotRequest():
@@ -424,8 +424,8 @@ def keystrokeRequest():
         pass
 
     def enableWindow():
-        os.remove("keylog.txt")
         newWindow.destroy()
+        client.sendall(bytes("-deletekeylogfile-", "utf8"))
 
     def Hook():
         global hooking

