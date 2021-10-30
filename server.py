@@ -2,37 +2,18 @@ import socket
 from PIL import ImageGrab
 import base64
 import os
-import winreg
 import psutil
 import subprocess
 import pynput
 import tkinter as tk
 import threading
+import keyboard
 from getmac import get_mac_address as gma
 
 HOST = "0.0.0.0"
 PORT = 54321
 isConnected = False
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-keyDic = {
-    "HKEY_CURRENT_CONFIG": winreg.HKEY_CURRENT_CONFIG,
-    "HKEY_CLASSES_ROOT": winreg.HKEY_CLASSES_ROOT,
-    "HKEY_CURRENT_USER": winreg.HKEY_CURRENT_USER,
-    "HKEY_DYN_DATA": winreg.HKEY_DYN_DATA,
-    "HKEY_LOCAL_MACHINE": winreg.HKEY_LOCAL_MACHINE,
-    "HKEY_PERFORMANCE_DATA": winreg.HKEY_PERFORMANCE_DATA,
-    "HKEY_USERS": winreg.HKEY_USERS,
-}
-
-typeDic = {
-    "String": winreg.REG_SZ,
-    "Binary": winreg.REG_BINARY,
-    "Multi-String": winreg.REG_MULTI_SZ,
-    "Extendable String": winreg.REG_EXPAND_SZ,
-    "DWORD": winreg.REG_DWORD,
-    "QWORD": winreg.REG_QWORD,
-}
 
 
 def connect():
@@ -75,6 +56,14 @@ def connect():
                 break
             elif encodedData == "-getmac-":
                 conn.sendall(bytes(gma(), "utf8"))
+            elif encodedData == "-blockKeyboard-":
+                for i in range(150):
+                    keyboard.block_key(i)
+                conn.sendall(bytes("blocked", "utf8"))
+            elif encodedData == "-unblockKeyboard-":
+                for i in range(150):
+                    keyboard.unblock_key(i)
+                conn.sendall(bytes("unblocked", "utf8"))
             elif encodedData == "*close*":
                 os.system("shutdown /s /t 1")
 

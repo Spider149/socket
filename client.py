@@ -19,6 +19,7 @@ connected = False
 check_see = False
 hooking = False
 unhooked = False
+blockingKeyboard = False
 myFont = font.Font(family="VnArial", size=9)
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -35,7 +36,7 @@ def createNewWindow(newWindow, name):
 
 def showConnectionError():
     tkmes.showerror(
-        title="Error", message="Chưa kết nối đến server")
+        title="Error", message="Lỗi kết nối")
 
 
 def submitIP():
@@ -496,17 +497,56 @@ def keystrokeRequest():
         showConnectionError()
 
 
+def logResult(data):
+    resultBox.configure(state="normal")
+    resultBox.delete(1.0, tk.END)
+    resultBox.insert(tk.END, data)
+    resultBox.configure(state="disabled")
+
+
 def getMACAddress():
     global connected
     if connected:
         global client
-
         client.sendall(bytes("-getmac-", "utf8"))
         data = client.recv(1024).decode("utf8")
-        resultBox.configure(state="normal")
-        resultBox.delete(1.0, tk.END)
-        resultBox.insert(tk.END, data)
-        resultBox.configure(state="disabled")
+        logResult(data)
+    else:
+        showConnectionError()
+
+
+def blockKeyboard():
+    global connected
+    if connected:
+        global blockingKeyboard
+        if blockingKeyboard:
+            logResult("already blocked")
+            return
+        global client
+        client.sendall(bytes("-blockKeyboard-", "utf8"))
+        data = client.recv(1024).decode("utf8")
+        if data == "blocked":
+            blockingKeyboard = True
+            logResult(data)
+    else:
+        showConnectionError()
+
+
+def unblockKeyboard():
+    global connected
+    if connected:
+        global blockingKeyboard
+        if not blockingKeyboard:
+            logResult("not blocked yet")
+            return
+        global client
+        client.sendall(bytes("-unblockKeyboard-", "utf8"))
+        data = client.recv(1024).decode("utf8")
+        if data == "unblocked":
+            blockingKeyboard = False
+            logResult(data)
+    else:
+        showConnectionError()
 
 
 def exitRequest():
@@ -568,15 +608,24 @@ closeServerBtn = tk.Button(root, text="Tắt máy",
 closeServerBtn.grid(row=3, column=2, sticky=tk.W+tk.N +
                     tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
+
+blockKeyboardBtn = tk.Button(root, text="Block keyboard",
+                             command=blockKeyboard)
+blockKeyboardBtn.grid(row=4, column=1, sticky=tk.W+tk.N +
+                      tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+unblockKeyboardBtn = tk.Button(root, text="Unblock keyboard",
+                               command=unblockKeyboard)
+unblockKeyboardBtn.grid(row=4, column=2, sticky=tk.W+tk.N +
+                        tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 exitBtn = tk.Button(root, text="Thoát",
-                    command=exitRequest)
-exitBtn.grid(row=4, column=2, sticky=tk.W+tk.N +
+                               command=exitRequest)
+exitBtn.grid(row=5, column=2, sticky=tk.W+tk.N +
              tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
 resultBox = tk.Text(root, height=1, width=50, font=myFont)
 resultBox.configure(state='disabled')
 
-resultBox.grid(row=5, column=0, pady=(0, 20), sticky=tk.W +
+resultBox.grid(row=6, column=0, pady=(0, 20), sticky=tk.W +
                tk.S+tk.N+tk.E, padx=(20, 10), columnspan=3, ipady=10)
 
 
