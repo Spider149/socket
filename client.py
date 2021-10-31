@@ -13,6 +13,9 @@ from vidstream import ScreenShareClient
 
 root = tk.Tk()
 root.title("Client")
+s = ttk.Style(root)
+s.configure('Treeview', rowheight=30)
+s.configure('Treeview.Heading', height=30)
 
 root.minsize(510, 375)
 connected = False
@@ -34,7 +37,7 @@ def onClosing2(parent, current):
 
 
 def createNewWindow(newWindow, name):
-    newWindow.minsize(340, 250)
+    newWindow.minsize(510, 375)
     newWindow.title(name)
 
 
@@ -92,7 +95,7 @@ def takeScreenshotRequest():
 
     def resizeImg():
         img = Image.open('snapshot.png')
-        newWidth = 360
+        newWidth = 1020
         ratioScale = img.width/newWidth
         newHeight = int(img.height/ratioScale)
         resized = img.resize((newWidth, newHeight), Image.ANTIALIAS)
@@ -103,6 +106,7 @@ def takeScreenshotRequest():
     if connected:
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "Screenshot")
+        newWindow.minsize(1020, 750)
         snapBtn = tk.Button(newWindow, text="Chụp",
                             command=takeScreen)
         snapBtn.grid(row=0, column=0, sticky=tk.W+tk.N +
@@ -252,11 +256,11 @@ def processRunningRequest():
                       tk.S+tk.E, pady=20, padx=(0))
         tree = ttk.Treeview(newWindow, selectmode='browse')
         tree.grid(row=1, column=0, columnspan=4, sticky=tk.W+tk.N +
-                  tk.S+tk.E, padx=(20, 0))
+                  tk.S+tk.E, padx=(20, 0), pady=(0, 20))
 
         vsb = ttk.Scrollbar(newWindow, orient="vertical", command=tree.yview)
         vsb.grid(row=1, column=4, sticky=tk.W+tk.N +
-                 tk.S, padx=(0, 20))
+                 tk.S, padx=(0, 20), pady=(0, 20))
         tree.configure(yscrollcommand=vsb.set)
         tree["columns"] = ("1", "2", "3")
         tree['show'] = 'headings'
@@ -398,11 +402,11 @@ def appRunningRequest():
 
         tree = ttk.Treeview(newWindow, selectmode='browse')
         tree.grid(row=1, column=0, columnspan=4, sticky=tk.W+tk.N +
-                  tk.S+tk.E, padx=(20, 0))
+                  tk.S+tk.E, padx=(20, 0), pady=(0, 20))
 
         vsb = ttk.Scrollbar(newWindow, orient="vertical", command=tree.yview)
         vsb.grid(row=1, column=4, sticky=tk.W+tk.N +
-                 tk.S, padx=(0, 20))
+                 tk.S, padx=(0, 20), pady=(0, 20))
         tree.configure(yscrollcommand=vsb.set)
         tree["columns"] = ("1", "2", "3")
         tree['show'] = 'headings'
@@ -499,7 +503,7 @@ def keystrokeRequest():
                     tk.S+tk.E, pady=20, padx=(0, 20))
         Text_box = tk.Text(newWindow, height=15, width=41)
         Text_box.grid(row=1, column=0, sticky=tk.W+tk.N +
-                      tk.S+tk.E, padx=20, columnspan=4)
+                      tk.S+tk.E, padx=20, columnspan=4, pady=(0, 20))
         Text_box.configure(state="disabled")
         newWindow.grab_set()
         newWindow.mainloop()
@@ -627,6 +631,7 @@ def exitRequest():
         client.close()
     root.destroy()
 
+
 labelIP = tk.Label(root, text="Nhập IP:")
 labelIP.place(relx=0.02, rely=0.02, relheight=0.09, relwidth=0.18)
 
@@ -637,7 +642,7 @@ entryIP.place(relx=0.2, rely=0.02, relheight=0.09, relwidth=0.5)
 entryIP.insert(tk.END, '127.0.0.1')
 
 ipBtn = tk.Button(root, text="Nhập", command=submitIP)
-ipBtn.place(relx=0.72, rely=0.02, relheight=0.09, relwidth=0.25)
+ipBtn.place(relx=0.72, rely=0.02, relheight=0.09, relwidth=0.26)
 
 screenshotBtn = tk.Button(root, text="Chụp màn hình",
                           command=takeScreenshotRequest)
@@ -646,16 +651,16 @@ screenshotBtn.place(relx=0.02, rely=0.14, relheight=0.16, relwidth=0.35)
 
 processBtn = tk.Button(root, text="Process running",
                        command=processRunningRequest)
-processBtn.place(relx=0.39, rely=0.14, relheight=0.16, relwidth=0.57)
+processBtn.place(relx=0.39, rely=0.14, relheight=0.16, relwidth=0.59)
 
 getScreenBtn = tk.Button(root, text="Get Screen",
-                               command=getScreen)
+                         command=getScreen)
 
 getScreenBtn.place(relx=0.02, rely=0.32, relheight=0.16, relwidth=0.35)
 
 appRunningBtn = tk.Button(root, text="App Running",
                           command=appRunningRequest)
-appRunningBtn.place(relx=0.39, rely=0.32, relheight=0.16, relwidth=0.57)
+appRunningBtn.place(relx=0.39, rely=0.32, relheight=0.16, relwidth=0.59)
 
 blockKeyboardBtn = tk.Button(root, text="Block keyboard",
                              command=blockKeyboard)
