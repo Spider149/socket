@@ -23,7 +23,7 @@ blockingKeyboard = False
 host = ""
 port = 0
 clientStream = None
-countGetScreen = 0
+isStreaming = False
 myFont = font.Font(family="VnArial", size=9)
 client = None
 
@@ -527,73 +527,75 @@ def getMACAddress():
 
 def blockKeyboard():
     global connected
+    global client
+    global blockingKeyboard
+    global blockKeyboardBtn
     if connected:
-        global blockingKeyboard
-        if blockingKeyboard:
-            logResult("already blocked")
-            return
-        global client
-        client.sendall(bytes("-blockKeyboard-", "utf8"))
-        data = client.recv(1024).decode("utf8")
-        if data == "blocked":
-            blockingKeyboard = True
-            logResult(data)
-    else:
-        showConnectionError()
-
-
-def unblockKeyboard():
-    global connected
-    if connected:
-        global blockingKeyboard
         if not blockingKeyboard:
-            logResult("not blocked yet")
-            return
-        global client
-        client.sendall(bytes("-unblockKeyboard-", "utf8"))
-        data = client.recv(1024).decode("utf8")
-        if data == "unblocked":
-            blockingKeyboard = False
-            logResult(data)
+            client.sendall(bytes("-blockKeyboard-", "utf8"))
+            data = client.recv(1024).decode("utf8")
+            if data == "blocked":
+                blockingKeyboard = True
+                logResult(data)
+                blockKeyboardBtn['text'] = "Unblock keyboard"
+        else:
+            client.sendall(bytes("-unblockKeyboard-", "utf8"))
+            data = client.recv(1024).decode("utf8")
+            if data == "unblocked":
+                blockingKeyboard = False
+                logResult(data)
+                blockKeyboardBtn['text'] = "Block keyboard"
     else:
         showConnectionError()
+
 
 def getScreen():
     global connected
     global host
     global port
-    global countGetScreen
     global clientStream
+    global getScreenBtn
+    global isStreaming
     if connected:
-        if countGetScreen%2==0:
-            try: 
-                client.sendall(bytes("start_stream","utf8"))
+        if not isStreaming:
+            try:
+                client.sendall(bytes("start_stream", "utf8"))
             except:
                 pass
             clientStream = ScreenShareClient(host, 9999)
             clientStream.start_stream()
-            global getScreenBtn
             getScreenBtn['text'] = 'Stop Stream'
+            isStreaming = True
         else:
             clientStream.stop_stream()
             try:
-                client.sendall(bytes("stop_stream","utf8"))
+                client.sendall(bytes("stop_stream", "utf8"))
             except:
                 pass
             getScreenBtn['text'] = 'Get Screen'
-        countGetScreen+=1
+            isStreaming = False
     else:
         showConnectionError()
-    
 
 
 def logOut():
     global connected
+    global clientStream
+    global isStreaming
     if connected:
         global client
         connected = False
         if os.path.exists("snapshot.png"):
             os.remove("snapshot.png")
+        if isStreaming:
+            clientStream.stop_stream()
+            try:
+                client.sendall(bytes("stop_stream", "utf8"))
+            except:
+                pass
+            global getScreenBtn
+            getScreenBtn['text'] = 'Get Screen'
+            isStreaming = False
         try:
             client.sendall(bytes("-exit-", "utf8"))
         except:
@@ -606,10 +608,18 @@ def logOut():
 
 def exitRequest():
     global connected
+    global clientStream
+    global isStreaming
     if connected:
         global client
         if os.path.exists("snapshot.png"):
             os.remove("snapshot.png")
+        if isStreaming:
+            clientStream.stop_stream()
+            try:
+                client.sendall(bytes("stop_stream", "utf8"))
+            except:
+                pass
         try:
             client.sendall(bytes("-exit-", "utf8"))
         except:
@@ -667,19 +677,15 @@ blockKeyboardBtn = tk.Button(root, text="Block keyboard",
                              command=blockKeyboard)
 blockKeyboardBtn.grid(row=4, column=1, sticky=tk.W+tk.N +
                       tk.S+tk.E, pady=(0, 20), padx=(0, 10))
-unblockKeyboardBtn = tk.Button(root, text="Unblock keyboard",
-                               command=unblockKeyboard)
-unblockKeyboardBtn.grid(row=4, column=2, sticky=tk.W+tk.N +
-                        tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
 getScreenBtn = tk.Button(root, text="Get Screen",
-                               command=getScreen)
-getScreenBtn.grid(row=5, column=1, sticky=tk.W+tk.N +
-             tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+                         command=getScreen)
+getScreenBtn.grid(row=4, column=2, sticky=tk.W+tk.N +
+                  tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
 exitBtn = tk.Button(root, text="Thoát",
                                command=exitRequest)
-exitBtn.grid(row=6, column=2, sticky=tk.W+tk.N +
+exitBtn.grid(row=5, column=1, sticky=tk.W+tk.N +
              tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 logoutBtn = tk.Button(root, text="Log out",
                       command=logOut)

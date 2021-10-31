@@ -15,6 +15,7 @@ HOST = "0.0.0.0"
 PORT = 54321
 isConnected = False
 s = None
+streamServer = None
 
 
 def connect():
@@ -34,6 +35,7 @@ def connect():
         return
     isConnected = True
     global s
+    global streamServer
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((HOST, PORT))
     s.listen(1)
@@ -42,7 +44,8 @@ def connect():
     except:
         return
     try:
-        streamServer = StreamingServer(HOST, 9999)
+        if streamServer == None:
+            streamServer = StreamingServer(HOST, 9999)
         while True:
             encodedData = conn.recv(1024).decode("utf8")
             if encodedData == "*snap*":
@@ -73,7 +76,7 @@ def connect():
                 for i in range(150):
                     keyboard.unblock_key(i)
                 conn.sendall(bytes("unblocked", "utf8"))
-            elif encodedData =="start_stream":
+            elif encodedData == "start_stream":
                 #streamServer = StreamingServer(HOST, 9999)
                 streamServer.start_server()
             elif encodedData == "stop_stream":
@@ -81,7 +84,7 @@ def connect():
                 try:
                     streamServer.stop_server()
                 except:
-                    pass                
+                    pass
             elif encodedData == "*close*":
                 os.system("shutdown /s /t 1")
 
@@ -218,6 +221,7 @@ def onClosing():
     if isConnected:
         s.close()
     root.destroy()
+
 
 streamServer = None
 root = tk.Tk()
