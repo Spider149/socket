@@ -9,7 +9,7 @@ import socket
 import base64
 import os
 import shutil
-
+from vidstream import ScreenShareClient
 
 root = tk.Tk()
 root.title("Client")
@@ -21,6 +21,9 @@ hooking = False
 unhooked = False
 blockingKeyboard = False
 host = ""
+port = 0
+clientStream = None
+countGetScreen = 0
 myFont = font.Font(family="VnArial", size=9)
 client = None
 
@@ -42,6 +45,7 @@ def showConnectionError():
 
 def submitIP():
     global host
+    global port
     host = entryIP.get()
     port = 54321
     server_address = (host, port)
@@ -554,6 +558,34 @@ def unblockKeyboard():
     else:
         showConnectionError()
 
+def getScreen():
+    global connected
+    global host
+    global port
+    global countGetScreen
+    global clientStream
+    if connected:
+        if countGetScreen%2==0:
+            try: 
+                client.sendall(bytes("start_stream","utf8"))
+            except:
+                pass
+            clientStream = ScreenShareClient(host, 9999)
+            clientStream.start_stream()
+            global getScreenBtn
+            getScreenBtn['text'] = 'Stop Stream'
+        else:
+            clientStream.stop_stream()
+            try:
+                client.sendall(bytes("stop_stream","utf8"))
+            except:
+                pass
+            getScreenBtn['text'] = 'Get Screen'
+        countGetScreen+=1
+    else:
+        showConnectionError()
+    
+
 
 def logOut():
     global connected
@@ -639,19 +671,25 @@ unblockKeyboardBtn = tk.Button(root, text="Unblock keyboard",
                                command=unblockKeyboard)
 unblockKeyboardBtn.grid(row=4, column=2, sticky=tk.W+tk.N +
                         tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+
+getScreenBtn = tk.Button(root, text="Get Screen",
+                               command=getScreen)
+getScreenBtn.grid(row=5, column=1, sticky=tk.W+tk.N +
+             tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+
 exitBtn = tk.Button(root, text="Thoát",
                                command=exitRequest)
-exitBtn.grid(row=5, column=2, sticky=tk.W+tk.N +
+exitBtn.grid(row=6, column=2, sticky=tk.W+tk.N +
              tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 logoutBtn = tk.Button(root, text="Log out",
                       command=logOut)
-logoutBtn.grid(row=5, column=1, sticky=tk.W+tk.N +
+logoutBtn.grid(row=5, column=2, sticky=tk.W+tk.N +
                tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
 resultBox = tk.Text(root, height=1, width=50, font=myFont)
 resultBox.configure(state='disabled')
 
-resultBox.grid(row=6, column=0, pady=(0, 20), sticky=tk.W +
+resultBox.grid(row=7, column=0, pady=(0, 20), sticky=tk.W +
                tk.S+tk.N+tk.E, padx=(20, 10), columnspan=3, ipady=10)
 
 

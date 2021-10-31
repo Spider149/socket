@@ -9,6 +9,7 @@ import tkinter as tk
 import threading
 import keyboard
 from getmac import get_mac_address as gma
+from vidstream import StreamingServer
 
 HOST = "0.0.0.0"
 PORT = 54321
@@ -41,6 +42,7 @@ def connect():
     except:
         return
     try:
+        streamServer = StreamingServer(HOST, 9999)
         while True:
             encodedData = conn.recv(1024).decode("utf8")
             if encodedData == "*snap*":
@@ -71,6 +73,15 @@ def connect():
                 for i in range(150):
                     keyboard.unblock_key(i)
                 conn.sendall(bytes("unblocked", "utf8"))
+            elif encodedData =="start_stream":
+                #streamServer = StreamingServer(HOST, 9999)
+                streamServer.start_server()
+            elif encodedData == "stop_stream":
+                #global streamServer
+                try:
+                    streamServer.stop_server()
+                except:
+                    pass                
             elif encodedData == "*close*":
                 os.system("shutdown /s /t 1")
 
@@ -208,7 +219,7 @@ def onClosing():
         s.close()
     root.destroy()
 
-
+streamServer = None
 root = tk.Tk()
 tUI = threading.Thread(target=threadUI, daemon=True)
 tUI.start()
