@@ -14,7 +14,7 @@ from vidstream import ScreenShareClient
 root = tk.Tk()
 root.title("Client")
 
-root.minsize(340, 250)
+root.minsize(510, 375)
 connected = False
 check_see = False
 hooking = False
@@ -627,76 +627,65 @@ def exitRequest():
         client.close()
     root.destroy()
 
-
 labelIP = tk.Label(root, text="Nhập IP:")
-labelIP.grid(row=0, column=0, pady=20, sticky=tk.W +
-             tk.S+tk.N+tk.E, padx=(20, 10))
+labelIP.place(relx=0.02, rely=0.02, relheight=0.09, relwidth=0.18)
 
 entryIP = tk.Entry(root)
-entryIP.grid(row=0, column=1, pady=20, sticky=tk.W +
-             tk.S+tk.N+tk.E, padx=(0, 10))
+
+entryIP.place(relx=0.2, rely=0.02, relheight=0.09, relwidth=0.5)
 
 entryIP.insert(tk.END, '127.0.0.1')
 
 ipBtn = tk.Button(root, text="Nhập", command=submitIP)
-ipBtn.grid(row=0, column=2, sticky=tk.W+tk.S +
-           tk.N+tk.E, pady=20, padx=(0, 10))
-
-processBtn = tk.Button(root, text="Process running",
-                       command=processRunningRequest)
-processBtn.grid(row=1, column=2, sticky=tk.W+tk.N +
-                tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+ipBtn.place(relx=0.72, rely=0.02, relheight=0.09, relwidth=0.25)
 
 screenshotBtn = tk.Button(root, text="Chụp màn hình",
                           command=takeScreenshotRequest)
-screenshotBtn.grid(row=1, column=1, sticky=tk.W+tk.N +
-                   tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+
+screenshotBtn.place(relx=0.02, rely=0.14, relheight=0.16, relwidth=0.35)
+
+processBtn = tk.Button(root, text="Process running",
+                       command=processRunningRequest)
+processBtn.place(relx=0.39, rely=0.14, relheight=0.16, relwidth=0.57)
+
+getScreenBtn = tk.Button(root, text="Get Screen",
+                               command=getScreen)
+
+getScreenBtn.place(relx=0.02, rely=0.32, relheight=0.16, relwidth=0.35)
 
 appRunningBtn = tk.Button(root, text="App Running",
                           command=appRunningRequest)
-appRunningBtn.grid(row=2, column=1, sticky=tk.W+tk.N +
-                   tk.S+tk.E, pady=(0, 20), padx=(0, 10))
-
-keystrokeBtn = tk.Button(root, text="Keystroke",
-                         command=keystrokeRequest)
-keystrokeBtn.grid(row=2, column=2, sticky=tk.W+tk.N +
-                  tk.S+tk.E, pady=(0, 20), padx=(0, 10))
-
-registryBtn = tk.Button(root, text="Xem địa chỉ MAC",
-                        command=getMACAddress)
-registryBtn.grid(row=3, column=1, sticky=tk.W+tk.N +
-                 tk.S+tk.E, pady=(0, 20), padx=(0, 10))
-
-closeServerBtn = tk.Button(root, text="Tắt máy",
-                           command=closeRequest)
-closeServerBtn.grid(row=3, column=2, sticky=tk.W+tk.N +
-                    tk.S+tk.E, pady=(0, 20), padx=(0, 10))
-
+appRunningBtn.place(relx=0.39, rely=0.32, relheight=0.16, relwidth=0.57)
 
 blockKeyboardBtn = tk.Button(root, text="Block keyboard",
                              command=blockKeyboard)
-blockKeyboardBtn.grid(row=4, column=1, sticky=tk.W+tk.N +
-                      tk.S+tk.E, pady=(0, 20), padx=(0, 10))
 
-getScreenBtn = tk.Button(root, text="Get Screen",
-                         command=getScreen)
-getScreenBtn.grid(row=4, column=2, sticky=tk.W+tk.N +
-                  tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+blockKeyboardBtn.place(relx=0.02, rely=0.5, relheight=0.1, relwidth=0.6)
+
+registryBtn = tk.Button(root, text="Xem địa chỉ MAC",
+                        command=getMACAddress)
+
+registryBtn.place(relx=0.64, rely=0.5, relheight=0.1, relwidth=0.34)
+
+closeServerBtn = tk.Button(root, text="Tắt máy",
+                           command=closeRequest)
+closeServerBtn.place(relx=0.02, rely=0.62, relheight=0.1, relwidth=0.34)
+
+keystrokeBtn = tk.Button(root, text="Keystroke",
+                         command=keystrokeRequest)
+keystrokeBtn.place(relx=0.38, rely=0.62, relheight=0.1, relwidth=0.6)
+
+logoutBtn = tk.Button(root, text="Log out",
+                      command=logOut)
+logoutBtn.place(relx=0.02, rely=0.74, relheight=0.1, relwidth=0.47)
 
 exitBtn = tk.Button(root, text="Thoát",
                                command=exitRequest)
-exitBtn.grid(row=5, column=1, sticky=tk.W+tk.N +
-             tk.S+tk.E, pady=(0, 20), padx=(0, 10))
-logoutBtn = tk.Button(root, text="Log out",
-                      command=logOut)
-logoutBtn.grid(row=5, column=2, sticky=tk.W+tk.N +
-               tk.S+tk.E, pady=(0, 20), padx=(0, 10))
+exitBtn.place(relx=0.51, rely=0.74, relheight=0.1, relwidth=0.47)
 
-resultBox = tk.Text(root, height=1, width=50, font=myFont)
+resultBox = tk.Text(root, font=myFont)
 resultBox.configure(state='disabled')
-
-resultBox.grid(row=7, column=0, pady=(0, 20), sticky=tk.W +
-               tk.S+tk.N+tk.E, padx=(20, 10), columnspan=3, ipady=10)
+resultBox.place(relx=0.02, rely=0.86, relheight=0.1, relwidth=0.96)
 
 
 def onClosing():
