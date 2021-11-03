@@ -1,3 +1,4 @@
+from ctypes import LittleEndianStructure
 import tkinter as tk
 from tkinter.constants import DISABLED
 import tkinter.messagebox as tkmes
@@ -10,6 +11,7 @@ import base64
 import os
 import shutil
 from vidstream import ScreenShareClient
+import pickle
 
 root = tk.Tk()
 root.title("Client")
@@ -29,6 +31,8 @@ clientStream = None
 isStreaming = False
 myFont = font.Font(family="VnArial", size=9)
 client = None
+currentPath = ""
+BUFSIZ = 1024 * 1024
 
 
 def onClosing2(parent, current):
@@ -580,76 +584,147 @@ def getScreen():
             isStreaming = False
     else:
         showConnectionError()
+
+
 def getAndCopyFile():
     def goPrevious():
-        return
+        global currentPath
+        try:
+            slicePoint = currentPath.rindex("\\")
+            slicePointFromLeft = currentPath.index("\\")
+            if(slicePoint == slicePointFromLeft):
+                return
+            if getDirectoryRequest(currentPath[0:slicePoint]):
+                serverPath.delete(0, tk.END)
+                serverPath.insert(0, currentPath)
+        except:
+            return
 
-    def goNext():
-        return
-    
     def submitClientPath():
-        return
+        filename = tkdilg.askopenfilename(
+            initialdir="/", title="Choose a file to copy to client")
+        if filename != "":
+            clientPath.delete(0, tk.END)
+            clientPath.insert(0, filename.replace("/", "\\"))
 
     def submitServerPath():
-        return
+        svp = serverPath.get()
+        getDirectoryRequest(svp)
+
+    def getDirectoryRequest(svp):
+        client.sendall(bytes("-getDirectory-", "utf8"))
+        client.sendall(bytes(svp, "utf8"))
+        data = client.recv(BUFSIZ)
+        try:
+            if(data.decode("utf8") == "invalid"):
+                tkmes.showerror(
+                    title="Error", message="Invalid or not existed path in server")
+                return False
+        except:
+            try:
+                rs = pickle.loads(data)
+                global currentPath
+                currentPath = svp
+                listFiles(rs[0], rs[1])
+                return True
+            except:
+                showConnectionError()
+                return False
 
     def copyFile():
         return
 
-    def removeFile():
-        return
+    def removeFile(filename):
+        try:
+            client.sendall(bytes("-deletefile-", "utf8"))
+            client.sendall(bytes(filename, "utf8"))
+            data = client.recv(1024).decode("utf8")
+            if(data == "success"):
+                tkmes.showinfo(title="Delete file",
+                               message="%s deleted" % filename)
+                getDirectoryRequest(currentPath)
+            else:
+                tkmes.tkmes.showerror(
+                    title="Delete file", message="Delete file failed")
+        except:
+            showConnectionError()
 
     def onDoubleClick(event):
-        return
-
-    def listFiles(startpath):
-        for root, dirs, files in os.walk(startpath):
-            level = root.replace(startpath, '').count(os.sep)
-            if level >= 1:
+        try:
+            item = folderTree.selection()[0]
+            global currentPath
+            lineText = folderTree.item(item, "text")
+            if lineText[0] == 'F':
+                # nhảy lên 1 cửa sổ hỏi bạn có muốn delete file này không, nếu ok thì xóa
+                if tkmes.askokcancel("Delete file", "Do you want to delete this file?"):
+                    removeFile(lineText[1:])
                 return
-            for d in dirs:
-                folderTree.insert("", "end", text='D'+d,
-                            values=('[FOLDER] %s' % d,))
-            for f in files:
-                folderTree.insert("", "end", text='F'+f, values=('[FILE] %s' % f,))
+            svp = currentPath + "\\" + \
+                lineText[1:]
+            if getDirectoryRequest(svp):
+                serverPath.delete(0, tk.END)
+                serverPath.insert(0, currentPath)
+        except:
+            return
+
+    def listFiles(dirs, files):
+        folderTree.delete(*folderTree.get_children())
+        folderTree.heading("1", text=currentPath)
+        for d in dirs:
+            folderTree.insert("", "end", text='D'+d,
+                              values=('[FOLDER] %s' % d,))
+        for f in files:
+            folderTree.insert("", "end", text='F'+f,
+                              values=('[FILE] %s' % f,))
 
     if connected:
+        global client
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "Copy/Remove Button")
+        newWindow.minsize(700, 500)
         clientPath = tk.Entry(newWindow)
         clientPath.place(relx=0.02, rely=0.02, relheight=0.09, relwidth=0.68)
         clientPath.insert(tk.END, "Input client path")
-        submitClientPathBtn = tk.Button(newWindow,text="Submit", command=submitClientPath)
-        submitClientPathBtn.place(relx=0.72, rely=0.02, relheight=0.09, relwidth=0.26)
+        submitClientPathBtn = tk.Button(
+            newWindow, text="Browser", command=submitClientPath)
+        submitClientPathBtn.place(
+            relx=0.72, rely=0.02, relheight=0.09, relwidth=0.26)
         serverPath = tk.Entry(newWindow)
         serverPath.place(relx=0.02, rely=0.13, relheight=0.09, relwidth=0.68)
         serverPath.insert(tk.END, "Input server path")
-        submitServerPathBtn = tk.Button(newWindow, text ="Submit", command=submitServerPath)
-        submitServerPathBtn.place(relx=0.72, rely=0.13, relheight=0.09, relwidth=0.26)
+        submitServerPathBtn = tk.Button(
+            newWindow, text="Access", command=submitServerPath)
+        submitServerPathBtn.place(
+            relx=0.72, rely=0.13, relheight=0.09, relwidth=0.26)
         copyBtn = tk.Button(newWindow, text="Copy", command=copyFile)
         copyBtn.place(relx=0.02, rely=0.24, relheight=0.09, relwidth=0.47)
-        copyBtn = tk.Button(newWindow, text="Remove", command=removeFile)
-        copyBtn.place(relx=0.51, rely=0.24, relheight=0.09, relwidth=0.47)
-        copyBtn = tk.Button(newWindow, text="Previous", command=goPrevious)
-        copyBtn.place(relx=0.02, rely=0.35, relheight=0.09, relwidth=0.47)
-        copyBtn = tk.Button(newWindow, text="Next", command=goNext)
-        copyBtn.place(relx=0.51, rely=0.35, relheight=0.09, relwidth=0.47)
+        prevBtn = tk.Button(newWindow, text="Previous", command=goPrevious)
+        prevBtn.place(relx=0.51, rely=0.24, relheight=0.09, relwidth=0.47)
         folderTree = ttk.Treeview(newWindow, selectmode='browse')
-        folderTree.place(relx=0.02, rely=0.46, relheight=0.52, relwidth=0.9)
-        vsb = ttk.Scrollbar(newWindow, orient="vertical", command=folderTree.yview)
-        vsb.place(relx=0.93, rely=0.46, relheight=0.52)
+        folderTree.place(relx=0.02, rely=0.38, relheight=0.6, relwidth=0.9)
+        vsb = ttk.Scrollbar(newWindow, orient="vertical",
+                            command=folderTree.yview)
+        vsb.place(relx=0.93, rely=0.38, relheight=0.6)
         folderTree.configure(yscrollcommand=vsb.set)
         folderTree["columns"] = ("1")
         folderTree['show'] = 'headings'
         folderTree.column("1", width=400, anchor='w')
         folderTree.bind("<Double-1>", onDoubleClick)
-        currentPath = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
-        folderTree.heading("1", text=currentPath)
-        listFiles(currentPath)
+        try:
+            global currentPath
+            client.sendall(bytes("-getDesktop-", "utf8"))
+            currentPath = client.recv(1024).decode("utf8")
+            folderTree.heading("1", text=currentPath)
+            serverPath.delete(0, tk.END)
+            serverPath.insert(0, currentPath)
+        except:
+            showConnectionError()
         newWindow.grab_set()
         newWindow.mainloop()
+
     else:
         showConnectionError()
+
 
 def logOut():
     global connected
@@ -737,14 +812,14 @@ blockKeyboardBtn = tk.Button(root, text="Block keyboard",
 blockKeyboardBtn.place(relx=0.02, rely=0.5, relheight=0.1, relwidth=0.3)
 
 getFileBtn = tk.Button(root, text="Remove/Copy File",
-                             command=getAndCopyFile)
+                       command=getAndCopyFile)
 
 getFileBtn.place(relx=0.34, rely=0.5, relheight=0.1, relwidth=0.32)
 
-registryBtn = tk.Button(root, text="Xem địa chỉ MAC",
-                        command=getMACAddress)
+getMACBtn = tk.Button(root, text="Xem địa chỉ MAC",
+                      command=getMACAddress)
 
-registryBtn.place(relx=0.68, rely=0.5, relheight=0.1, relwidth=0.3)
+getMACBtn.place(relx=0.68, rely=0.5, relheight=0.1, relwidth=0.3)
 
 closeServerBtn = tk.Button(root, text="Tắt máy",
                            command=closeRequest)
