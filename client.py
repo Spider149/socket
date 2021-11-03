@@ -602,6 +602,17 @@ def getAndCopyFile():
     def onDoubleClick(event):
         return
 
+    def listFiles(startpath):
+        for root, dirs, files in os.walk(startpath):
+            level = root.replace(startpath, '').count(os.sep)
+            if level >= 1:
+                return
+            for d in dirs:
+                folderTree.insert("", "end", text='D'+d,
+                            values=('[FOLDER] %s' % d,))
+            for f in files:
+                folderTree.insert("", "end", text='F'+f, values=('[FILE] %s' % f,))
+
     if connected:
         newWindow = tk.Toplevel(root)
         createNewWindow(newWindow, "Copy/Remove Button")
@@ -631,8 +642,10 @@ def getAndCopyFile():
         folderTree["columns"] = ("1")
         folderTree['show'] = 'headings'
         folderTree.column("1", width=400, anchor='w')
-        #folderTree.heading("1", text=currentPath)
         folderTree.bind("<Double-1>", onDoubleClick)
+        currentPath = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop')
+        folderTree.heading("1", text=currentPath)
+        listFiles(currentPath)
         newWindow.grab_set()
         newWindow.mainloop()
     else:
