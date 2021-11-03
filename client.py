@@ -580,7 +580,63 @@ def getScreen():
             isStreaming = False
     else:
         showConnectionError()
+def getAndCopyFile():
+    def goPrevious():
+        return
 
+    def goNext():
+        return
+    
+    def submitClientPath():
+        return
+
+    def submitServerPath():
+        return
+
+    def copyFile():
+        return
+
+    def removeFile():
+        return
+
+    def onDoubleClick(event):
+        return
+
+    if connected:
+        newWindow = tk.Toplevel(root)
+        createNewWindow(newWindow, "Copy/Remove Button")
+        clientPath = tk.Entry(newWindow)
+        clientPath.place(relx=0.02, rely=0.02, relheight=0.09, relwidth=0.68)
+        clientPath.insert(tk.END, "Input client path")
+        submitClientPathBtn = tk.Button(newWindow,text="Submit", command=submitClientPath)
+        submitClientPathBtn.place(relx=0.72, rely=0.02, relheight=0.09, relwidth=0.26)
+        serverPath = tk.Entry(newWindow)
+        serverPath.place(relx=0.02, rely=0.13, relheight=0.09, relwidth=0.68)
+        serverPath.insert(tk.END, "Input server path")
+        submitServerPathBtn = tk.Button(newWindow, text ="Submit", command=submitServerPath)
+        submitServerPathBtn.place(relx=0.72, rely=0.13, relheight=0.09, relwidth=0.26)
+        copyBtn = tk.Button(newWindow, text="Copy", command=copyFile)
+        copyBtn.place(relx=0.02, rely=0.24, relheight=0.09, relwidth=0.47)
+        copyBtn = tk.Button(newWindow, text="Remove", command=removeFile)
+        copyBtn.place(relx=0.51, rely=0.24, relheight=0.09, relwidth=0.47)
+        copyBtn = tk.Button(newWindow, text="Previous", command=goPrevious)
+        copyBtn.place(relx=0.02, rely=0.35, relheight=0.09, relwidth=0.47)
+        copyBtn = tk.Button(newWindow, text="Next", command=goNext)
+        copyBtn.place(relx=0.51, rely=0.35, relheight=0.09, relwidth=0.47)
+        folderTree = ttk.Treeview(newWindow, selectmode='browse')
+        folderTree.place(relx=0.02, rely=0.46, relheight=0.52, relwidth=0.9)
+        vsb = ttk.Scrollbar(newWindow, orient="vertical", command=folderTree.yview)
+        vsb.place(relx=0.93, rely=0.46, relheight=0.52)
+        folderTree.configure(yscrollcommand=vsb.set)
+        folderTree["columns"] = ("1")
+        folderTree['show'] = 'headings'
+        folderTree.column("1", width=400, anchor='w')
+        #folderTree.heading("1", text=currentPath)
+        folderTree.bind("<Double-1>", onDoubleClick)
+        newWindow.grab_set()
+        newWindow.mainloop()
+    else:
+        showConnectionError()
 
 def logOut():
     global connected
@@ -665,12 +721,17 @@ appRunningBtn.place(relx=0.39, rely=0.32, relheight=0.16, relwidth=0.59)
 blockKeyboardBtn = tk.Button(root, text="Block keyboard",
                              command=blockKeyboard)
 
-blockKeyboardBtn.place(relx=0.02, rely=0.5, relheight=0.1, relwidth=0.6)
+blockKeyboardBtn.place(relx=0.02, rely=0.5, relheight=0.1, relwidth=0.3)
+
+getFileBtn = tk.Button(root, text="Remove/Copy File",
+                             command=getAndCopyFile)
+
+getFileBtn.place(relx=0.34, rely=0.5, relheight=0.1, relwidth=0.32)
 
 registryBtn = tk.Button(root, text="Xem địa chỉ MAC",
                         command=getMACAddress)
 
-registryBtn.place(relx=0.64, rely=0.5, relheight=0.1, relwidth=0.34)
+registryBtn.place(relx=0.68, rely=0.5, relheight=0.1, relwidth=0.3)
 
 closeServerBtn = tk.Button(root, text="Tắt máy",
                            command=closeRequest)

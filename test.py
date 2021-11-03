@@ -76,7 +76,7 @@ tree.grid(row=1, column=0, sticky=tk.W+tk.N +
 vsb = ttk.Scrollbar(root, orient="vertical", command=tree.yview)
 vsb.grid(row=1, column=2, sticky=tk.W+tk.N +
          tk.S, padx=(0, 20), pady=20)
-tree.configure(yscrollcommand=vsb.set)
+#tree.configure(yscrollcommand=vsb.set)
 tree["columns"] = ("1")
 tree['show'] = 'headings'
 tree.column("1", width=400, anchor='w')
