@@ -98,25 +98,25 @@ def connect():
                     conn.sendall(bytes("success", "utf8"))
                 except:
                     conn.sendall(bytes("fail", "utf8"))
-            elif encodedData == '-copyFile-':
-                currPath = ""
+            elif encodedData == "-copyFile-":
                 fileName = ""
                 try:
-                    currPath = conn.recv(1024).decode('utf8')
-                    fileName = conn.recv(1024).decode('utf8')
+                    fileName = conn.recv(1024).decode("utf8")
                 except:
                     pass
-                fileName = currPath + '/' + fileName
-                with open(fileName, 'w') as f:
+                print(fileName)
+                with open(fileName, 'wb') as f:
                     while True:
-                        byteRead = None
+                        byteRead = b''
                         try:
                             byteRead = conn.recv(1024)
                         except:
-                            pass
-                        if not byteRead:
                             break
-                        f.write(byteRead)
+                        if byteRead == b'_end_':
+                            break
+                        f.write(byteRead)                        
+                    f.close()
+                print("Here")
                         
             elif encodedData == "-getmac-":
                 conn.sendall(bytes(gma(), "utf8"))

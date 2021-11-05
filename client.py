@@ -635,31 +635,32 @@ def getAndCopyFile():
         # check choose file
         global currentPath
         filePath = clientPath.get()
-        fileName = filePath.split('/')[-1]
+        fileName = filePath.split('\\')[-1]
         try:
-            client.sendall(bytes('-copyFile-', 'utf8'))
+            client.sendall(bytes("-copyFile-", "utf8"))
         except:
             pass
+        sPath = currentPath
+        fileName = sPath + '\\' + fileName
         try:
-            client.sendall(bytes(folderTree.heading(), 'utf8'))
-            client.sendall(bytes(fileName, 'utf8'))
+            client.sendall(bytes(fileName, "utf8"))
         except:
             pass
-        with open(filePath, 'r') as f:
+        with open(filePath, "rb") as f:
             while True:
                 byteRead = f.read(1024)
-                if not byteRead:
-                    break
                 try:
                     client.sendall(byteRead)
                 except:
                     pass
-
-        
-        # open and copy fileName + content
-        # check folder 
-        # send message
-        return
+                if not byteRead:
+                    break
+            f.close()
+        try:
+            client.sendall(b'_end_')
+        except:
+            pass
+        print("Here")
 
     def removeFile(filename):
         try:
