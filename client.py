@@ -666,6 +666,7 @@ def getAndCopyFile():
             pass
         if (copySuccess=="-copySuccess-"):
             tkmes.showinfo(title="Copy File", message="Copy Successs")
+            getDirectoryRequest(currentPath)
         else:
             tkmes.showerror(title="Copy File", message="Invalid file!")
 
