@@ -658,6 +658,7 @@ def getAndCopyFile():
                             if(isSuccess):
                                 tkmes.showinfo(
                                     "Copy file", "Copy file from client to server successfully")
+                                getDirectoryRequest(currentPath)
                             else:
                                 tkmes.showerror(
                                     "Copy file", "Copy file from client to server failed")
