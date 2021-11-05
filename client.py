@@ -1,6 +1,4 @@
-from ctypes import LittleEndianStructure
 import tkinter as tk
-from tkinter.constants import DISABLED
 import tkinter.messagebox as tkmes
 import tkinter.filedialog as tkdilg
 import tkinter.ttk as ttk
@@ -632,6 +630,7 @@ def getAndCopyFile():
                 return False
 
     def copyFile():
+        # check choose file
         global currentPath
         filePath = clientPath.get()
         fileName = filePath.split('\\')[-1]
@@ -645,30 +644,38 @@ def getAndCopyFile():
             client.sendall(bytes(fileName, "utf8"))
         except:
             pass
-        with open(filePath, "rb") as f:
-            while True:
-                byteRead = f.read(1024)
-                try:
-                    client.sendall(byteRead)
-                except:
-                    pass
-                if not byteRead:
-                    break
-            f.close()
-        try:
-            client.sendall(b'_end_')
-        except:
-            pass
-        copySuccess = ""
-        try:
-            copySuccess = client.recv(1024).decode("utf8")
-        except:
-            pass
-        if (copySuccess=="-copySuccess-"):
-            tkmes.showinfo(title="Copy File", message="Copy Successs")
-            getDirectoryRequest(currentPath)
+        openOk = client.recv(1024).decode("utf8")
+        if(openOk == "opensuccess"):
+            with open(filePath, "rb") as f:
+                while True:
+                    byteRead = ""
+                    try:
+                        byteRead = f.read(1024)
+                    except:
+                        try:
+                            client.sendall(b'_end_')
+                            isSuccess = client.recv(1024).decode("utf8")
+                            if(isSuccess):
+                                tkmes.showinfo(
+                                    "Copy file", "Copy file from client to server successfully")
+                            else:
+                                tkmes.showerror(
+                                    "Copy file", "Copy file from client to server failed")
+                            break
+                        except:
+                            showConnectionError()
+                            break
+                    try:
+                        client.sendall(byteRead)
+                    except:
+                        tkmes.showerror(
+                            "Error", "Error when transfer data")
+                        break
+                    f.close()
+
         else:
-            tkmes.showerror(title="Copy File", message="Invalid file!")
+            tkmes.showerror(
+                title="Error", message="Create file in server failed")
 
     def removeFile(filename):
         try:
