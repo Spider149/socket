@@ -632,7 +632,6 @@ def getAndCopyFile():
                 return False
 
     def copyFile():
-        # check choose file
         global currentPath
         filePath = clientPath.get()
         fileName = filePath.split('\\')[-1]
@@ -660,7 +659,15 @@ def getAndCopyFile():
             client.sendall(b'_end_')
         except:
             pass
-        print("Here")
+        copySuccess = ""
+        try:
+            copySuccess = client.recv(1024).decode("utf8")
+        except:
+            pass
+        if (copySuccess=="-copySuccess-"):
+            tkmes.showinfo(title="Copy File", message="Copy Successs")
+        else:
+            tkmes.showerror(title="Copy File", message="Invalid file!")
 
     def removeFile(filename):
         try:

