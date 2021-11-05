@@ -649,30 +649,30 @@ def getAndCopyFile():
             with open(filePath, "rb") as f:
                 while True:
                     byteRead = ""
-                    try:
-                        byteRead = f.read(1024)
-                    except:
-                        try:
-                            client.sendall(b'_end_')
-                            isSuccess = client.recv(1024).decode("utf8")
-                            if(isSuccess):
-                                tkmes.showinfo(
-                                    "Copy file", "Copy file from client to server successfully")
-                                getDirectoryRequest(currentPath)
-                            else:
-                                tkmes.showerror(
-                                    "Copy file", "Copy file from client to server failed")
-                            break
-                        except:
-                            showConnectionError()
-                            break
+                    byteRead = f.read(1024)
                     try:
                         client.sendall(byteRead)
                     except:
-                        tkmes.showerror(
-                            "Error", "Error when transfer data")
+                        pass
+                    if not byteRead:
                         break
-                    f.close()
+                f.close()
+                try:
+                    client.sendall(b'_end_')
+                    isSuccess = client.recv(1024).decode("utf8")
+                    if(isSuccess):
+                        tkmes.showinfo(
+                            "Copy file", "Copy file from client to server successfully")
+                        getDirectoryRequest(currentPath)
+                    else:
+                        tkmes.showerror(
+                            "Copy file", "Copy file from client to server failed")
+                except:
+                    tkmes.showerror(
+                        "Error", "Error when transfer data")
+
+                
+                print("Here")
 
         else:
             tkmes.showerror(

@@ -107,13 +107,13 @@ def connect():
                             try:
                                 byteRead = conn.recv(1024)
                             except:
-                                conn.sendall(bytes("fail", "utf8"))
-                                break
+                                pass
                             if byteRead == b'_end_':
                                 conn.sendall(bytes("success", "utf8"))
                                 break
                             f.write(byteRead)
                         f.close()
+                    print("Here")
                 except:
                     conn.sendall(bytes("openfail", "utf8"))
 
