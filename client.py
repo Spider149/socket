@@ -649,20 +649,30 @@ def getAndCopyFile():
             client.sendall(bytes("-copyFile-", "utf8"))
         except:
             pass
-        sPath = currentPath
-        fileName = sPath + '\\' + fileName
         try:
-            print(fileName)
             client.sendall(bytes(fileName, "utf8"))
-            with open(filePath, "rb") as f:
-                while True:
-                    byteRead = f.read(1024*4)
-                    if not byteRead:
-                        tkmes.showinfo(
-                            "Copy file", "Copy file from client to server successfully")
-                        break
-                    client.sendall(byteRead)
-                f.close()
+            noti = client.recv(1024).decode("utf8")
+            if(noti == "gotfilename"):
+                fileSize = os.path.getsize(filePath)
+                client.sendall(bytes(str(fileSize), "utf8"))
+                noti = client.recv(1024).decode("utf8")
+                if(noti == "gotfilesize"):
+                    with open(filePath, "rb") as f:
+                        while True:
+                            byteRead = f.read(1024*4)
+                            if not byteRead:
+                                tkmes.showinfo(
+                                    "Copy file", "Copy file from client to server successfully")
+                                getDirectoryRequest(currentPath)
+                                break
+                            client.sendall(byteRead)
+                        f.close()
+                else:
+                    tkmes.showerror(
+                        title="Error", message="Error when transfer file size")
+            else:
+                tkmes.showerror(
+                    title="Error", message="Error when transfer file name")
         except:
             pass
 
