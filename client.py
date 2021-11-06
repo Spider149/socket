@@ -652,39 +652,19 @@ def getAndCopyFile():
         sPath = currentPath
         fileName = sPath + '\\' + fileName
         try:
+            print(fileName)
             client.sendall(bytes(fileName, "utf8"))
-        except:
-            pass
-        openOk = client.recv(1024).decode("utf8")
-        if(openOk == "opensuccess"):
             with open(filePath, "rb") as f:
                 while True:
-                    byteRead = ""
-                    byteRead = f.read(1024*1024)
-                    try:
-                        client.sendall(byteRead)
-                    except:
-                        pass
+                    byteRead = f.read(1024*4)
                     if not byteRead:
-                        break
-                f.close()
-                try:
-                    client.sendall(b'_end_')
-                    isSuccess = client.recv(1024).decode("utf8")
-                    if(isSuccess):
                         tkmes.showinfo(
                             "Copy file", "Copy file from client to server successfully")
-                        getDirectoryRequest(currentPath)
-                    else:
-                        tkmes.showerror(
-                            "Copy file", "Copy file from client to server failed")
-                except:
-                    tkmes.showerror(
-                        "Error", "Error when transfer data")
-
-        else:
-            tkmes.showerror(
-                title="Error", message="Create file in server failed")
+                        break
+                    client.sendall(byteRead)
+                f.close()
+        except:
+            pass
 
     def removeFile(filename):
         try:
@@ -842,7 +822,7 @@ entryIP = tk.Entry(root)
 
 entryIP.place(relx=0.2, rely=0.02, relheight=0.09, relwidth=0.5)
 
-entryIP.insert(tk.END, '127.0.0.1')
+entryIP.insert(tk.END, '192.168.197.131')
 
 ipBtn = tk.Button(root, text="Nhập", command=submitIP)
 ipBtn.place(relx=0.72, rely=0.02, relheight=0.09, relwidth=0.26)
