@@ -25,7 +25,7 @@ unhooked = False
 blockingKeyboard = False
 host = ""
 port = 0
-clientStream = StreamingServer("0.0.0.0", 9999)
+clientStream = None
 isStreaming = False
 myFont = font.Font(family="VnArial", size=9)
 client = None
@@ -559,27 +559,32 @@ def getScreen():
     global connected
     global host
     global port
-    global clientStream
     global getScreenBtn
     global isStreaming
+
     if connected:
+        global clientStream
         if not isStreaming:
+
+            clientStream = StreamingServer(
+                socket.gethostbyname(socket.gethostname()), 9999)
             clientStream.start_server()
             try:
                 client.sendall(bytes("start_stream", "utf8"))
+                client.sendall(
+                    bytes(socket.gethostbyname(socket.gethostname()), "utf8"))
             except:
                 pass
             getScreenBtn['text'] = 'Stop Stream'
             isStreaming = True
         else:
-            try:
-                clientStream.stop_server()
-            except:
-                pass
+            clientStream.stop_server()
+            clientStream = None
             try:
                 client.sendall(bytes("stop_stream", "utf8"))
             except:
                 pass
+
             getScreenBtn['text'] = 'Get Screen'
             isStreaming = False
     else:
@@ -651,7 +656,7 @@ def getAndCopyFile():
             with open(filePath, "rb") as f:
                 while True:
                     byteRead = ""
-                    byteRead = f.read(1024)
+                    byteRead = f.read(1024*1024)
                     try:
                         client.sendall(byteRead)
                     except:
@@ -673,7 +678,6 @@ def getAndCopyFile():
                     tkmes.showerror(
                         "Error", "Error when transfer data")
 
-                
                 print("Here")
 
         else:
@@ -784,6 +788,7 @@ def logOut():
         if isStreaming:
             try:
                 clientStream.stop_server()
+                clientStream = None
             except:
                 pass
             try:

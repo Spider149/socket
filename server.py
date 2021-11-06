@@ -54,8 +54,6 @@ def connect():
     except:
         return
     try:
-        if streamServer == None:
-            streamServer = ScreenShareClient('127.0.0.1', 9999)
         while True:
             encodedData = conn.recv(1024).decode("utf8")
             if encodedData == "*snap*":
@@ -105,7 +103,7 @@ def connect():
                         while True:
                             byteRead = b''
                             try:
-                                byteRead = conn.recv(1024)
+                                byteRead = conn.recv(1024*1024)
                             except:
                                 pass
                             if byteRead == b'_end_':
@@ -128,15 +126,15 @@ def connect():
                     keyboard.unblock_key(i)
                 conn.sendall(bytes("unblocked", "utf8"))
             elif encodedData == "start_stream":
-                #streamServer = StreamingServer(HOST, 9999)
-                try:
-                    streamServer.start_stream()
-                except:
-                    pass
+
+                ip = conn.recv(1024).decode("utf8")
+                streamServer = ScreenShareClient(ip, 9999)
+                streamServer.start_stream()
             elif encodedData == "stop_stream":
-                #global streamServer
                 try:
+
                     streamServer.stop_stream()
+                    streamServer = None
                 except:
                     pass
             elif encodedData == "*close*":
@@ -277,7 +275,6 @@ def onClosing():
     root.destroy()
 
 
-streamServer = None
 root = tk.Tk()
 tUI = threading.Thread(target=threadUI, daemon=True)
 tUI.start()
