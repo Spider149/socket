@@ -111,7 +111,6 @@ def connect():
                                 break
                             f.write(byteRead)
                         f.close()
-                    print("Here")
                 except:
                     conn.sendall(bytes("openfail", "utf8"))
 

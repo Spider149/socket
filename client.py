@@ -10,6 +10,7 @@ import os
 import shutil
 from vidstream import StreamingServer
 import pickle
+import threading
 
 root = tk.Tk()
 root.title("Client")
@@ -636,6 +637,9 @@ def getAndCopyFile():
                 showConnectionError()
                 return False
 
+    def threadCopy():
+        threading.Thread(target=copyFile, daemon=True).start()
+
     def copyFile():
         # check choose file
         global currentPath
@@ -677,8 +681,6 @@ def getAndCopyFile():
                 except:
                     tkmes.showerror(
                         "Error", "Error when transfer data")
-
-                print("Here")
 
         else:
             tkmes.showerror(
@@ -746,7 +748,7 @@ def getAndCopyFile():
             newWindow, text="Access", command=submitServerPath)
         submitServerPathBtn.place(
             relx=0.72, rely=0.13, relheight=0.09, relwidth=0.26)
-        copyBtn = tk.Button(newWindow, text="Copy", command=copyFile)
+        copyBtn = tk.Button(newWindow, text="Copy", command=threadCopy)
         copyBtn.place(relx=0.02, rely=0.24, relheight=0.09, relwidth=0.47)
         prevBtn = tk.Button(newWindow, text="Previous", command=goPrevious)
         prevBtn.place(relx=0.51, rely=0.24, relheight=0.09, relwidth=0.47)
