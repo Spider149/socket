@@ -9,7 +9,7 @@ import tkinter as tk
 import threading
 import keyboard
 from getmac import get_mac_address as gma
-from vidstream import StreamingServer
+from vidstream import ScreenShareClient
 import pickle
 
 HOST = "0.0.0.0"
@@ -55,7 +55,7 @@ def connect():
         return
     try:
         if streamServer == None:
-            streamServer = StreamingServer(HOST, 9999)
+            streamServer = ScreenShareClient('127.0.0.1', 9999)
         while True:
             encodedData = conn.recv(1024).decode("utf8")
             if encodedData == "*snap*":
@@ -129,11 +129,11 @@ def connect():
                 conn.sendall(bytes("unblocked", "utf8"))
             elif encodedData == "start_stream":
                 #streamServer = StreamingServer(HOST, 9999)
-                streamServer.start_server()
+                streamServer.start_stream()
             elif encodedData == "stop_stream":
                 #global streamServer
                 try:
-                    streamServer.stop_server()
+                    streamServer.stop_stream()
                 except:
                     pass
             elif encodedData == "*close*":

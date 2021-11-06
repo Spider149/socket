@@ -8,7 +8,7 @@ import socket
 import base64
 import os
 import shutil
-from vidstream import ScreenShareClient
+from vidstream import StreamingServer
 import pickle
 
 root = tk.Tk()
@@ -25,7 +25,7 @@ unhooked = False
 blockingKeyboard = False
 host = ""
 port = 0
-clientStream = None
+clientStream = StreamingServer("0.0.0.0", 9999)
 isStreaming = False
 myFont = font.Font(family="VnArial", size=9)
 client = None
@@ -564,18 +564,20 @@ def getScreen():
     global isStreaming
     if connected:
         if not isStreaming:
+            clientStream.start_server()
             try:
                 client.sendall(bytes("start_stream", "utf8"))
             except:
                 pass
-            clientStream = ScreenShareClient(host, 9999)
-            clientStream.start_stream()
             getScreenBtn['text'] = 'Stop Stream'
             isStreaming = True
         else:
-            clientStream.stop_stream()
             try:
                 client.sendall(bytes("stop_stream", "utf8"))
+            except:
+                pass
+            try:
+                clientStream.stop_server()
             except:
                 pass
             getScreenBtn['text'] = 'Get Screen'
@@ -780,7 +782,10 @@ def logOut():
         if os.path.exists("snapshot.png"):
             os.remove("snapshot.png")
         if isStreaming:
-            clientStream.stop_stream()
+            try:
+                clientStream.stop_server()
+            except:
+                pass
             try:
                 client.sendall(bytes("stop_stream", "utf8"))
             except:
@@ -807,7 +812,10 @@ def exitRequest():
         if os.path.exists("snapshot.png"):
             os.remove("snapshot.png")
         if isStreaming:
-            clientStream.stop_stream()
+            try:
+                clientStream.stop_server()
+            except:
+                pass
             try:
                 client.sendall(bytes("stop_stream", "utf8"))
             except:
