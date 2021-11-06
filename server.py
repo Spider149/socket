@@ -129,7 +129,10 @@ def connect():
                 conn.sendall(bytes("unblocked", "utf8"))
             elif encodedData == "start_stream":
                 #streamServer = StreamingServer(HOST, 9999)
-                streamServer.start_stream()
+                try:
+                    streamServer.start_stream()
+                except:
+                    pass
             elif encodedData == "stop_stream":
                 #global streamServer
                 try:

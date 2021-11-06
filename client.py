@@ -573,11 +573,11 @@ def getScreen():
             isStreaming = True
         else:
             try:
-                client.sendall(bytes("stop_stream", "utf8"))
+                clientStream.stop_server()
             except:
                 pass
             try:
-                clientStream.stop_server()
+                client.sendall(bytes("stop_stream", "utf8"))
             except:
                 pass
             getScreenBtn['text'] = 'Get Screen'
